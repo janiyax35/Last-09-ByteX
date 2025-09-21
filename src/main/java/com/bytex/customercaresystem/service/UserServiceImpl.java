@@ -89,7 +89,11 @@ public class UserServiceImpl implements UserService {
 
         existingUser.setFullName(userWithUpdates.getFullName());
         existingUser.setPhoneNumber(userWithUpdates.getPhoneNumber());
-        existingUser.setRole(userWithUpdates.getRole());
+
+        // Prevent an admin from changing their own role, or any admin's role
+        if (existingUser.getRole() != Role.ADMIN) {
+            existingUser.setRole(userWithUpdates.getRole());
+        }
 
         // Only update password if a new one is provided in the form
         if (userWithUpdates.getPassword() != null && !userWithUpdates.getPassword().isEmpty()) {

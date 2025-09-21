@@ -77,8 +77,9 @@ public class TechnicianController {
     @PostMapping("/repairs/{id}/request-part")
     public String requestPart(@org.springframework.web.bind.annotation.PathVariable Long id, @org.springframework.web.bind.annotation.RequestParam("partId") Long partId, @org.springframework.web.bind.annotation.RequestParam("quantity") int quantity, @org.springframework.web.bind.annotation.RequestParam("reason") String reason, Authentication authentication, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         User technician = getLoggedInUser(authentication);
+        com.bytex.customercaresystem.model.Repair repair = repairService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid repair Id:" + id));
         com.bytex.customercaresystem.model.Part part = partService.findById(partId).orElseThrow(() -> new IllegalArgumentException("Invalid part Id:" + partId));
-        partRequestService.createPartRequest(technician, part, quantity, reason);
+        partRequestService.createPartRequest(technician, part, quantity, reason, repair);
         redirectAttributes.addFlashAttribute("successMessage", "Part request submitted successfully.");
         return "redirect:/technician/repairs/" + id;
     }

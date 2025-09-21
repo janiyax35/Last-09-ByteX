@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layouts/dashboard-layout :: head(${pageTitle})}"></head>
+<body>
+<div class="wrapper">
+    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
+    <div id="content">
+        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
+        <div class="container-fluid">
+            <h1 class="h3 mb-2 text-light" th:text="${pageTitle}">Request Restock</h1>
+            <div class="card shadow mb-4">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Restock Request Details</h6></div>
+                <div class="card-body">
+                    <form th:action="@{/productmanager/parts/request-restock}" th:object="${partRequest}" method="post">
+                        <input type="hidden" name="partId" th:value="*{part.partId}" />
+                        <div class="mb-3">
+                            <label class="form-label">Part Name</label>
+                            <input type="text" class="form-control" th:value="*{part.partName}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantity to Request</label>
+                            <input type="number" class="form-control" id="quantity" th:field="*{quantity}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason / Notes</label>
+                            <textarea class="form-control" id="reason" th:field="*{reason}" rows="3" placeholder="e.g., Reached minimum stock threshold"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Request</button>
+                        <a th:href="@{/productmanager/low-stock}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
+</body>
+</html>

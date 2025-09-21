@@ -18,10 +18,12 @@ public class AdminController {
 
     private final UserService userService;
     private final ActivityLogService activityLogService;
+    private final com.bytex.customercaresystem.service.TicketService ticketService;
 
-    public AdminController(UserService userService, ActivityLogService activityLogService) {
+    public AdminController(UserService userService, ActivityLogService activityLogService, com.bytex.customercaresystem.service.TicketService ticketService) {
         this.userService = userService;
         this.activityLogService = activityLogService;
+        this.ticketService = ticketService;
     }
 
     @GetMapping("/dashboard")
@@ -110,5 +112,12 @@ public class AdminController {
     public String viewActivityLogs(Model model) {
         model.addAttribute("logs", activityLogService.findAllLogs());
         return "admin/activity-logs";
+    }
+
+    @GetMapping("/tickets")
+    public String monitorTickets(Model model) {
+        model.addAttribute("tickets", ticketService.findAllTickets());
+        model.addAttribute("pageTitle", "All System Tickets");
+        return "admin/all-tickets";
     }
 }

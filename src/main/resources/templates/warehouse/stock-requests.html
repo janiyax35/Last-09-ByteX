@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layouts/dashboard-layout :: head('Stock Requests')}"></head>
+<body>
+<div class="wrapper">
+    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
+    <div id="content">
+        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
+        <div class="container-fluid">
+            <h1 class="h3 mb-2 text-light">Stock Replenishment Requests</h1>
+            <p class="mb-4">This page lists all pending requests for part replenishment from the Product Manager.</p>
+            <div class="card shadow mb-4">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Pending Requests</h6></div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Part Name</th>
+                                    <th>Part Number</th>
+                                    <th>Requested By</th>
+                                    <th>Quantity</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="req : ${partRequests}">
+                                    <td th:text="${req.part.partName}"></td>
+                                    <td th:text="${req.part.partNumber}"></td>
+                                    <td th:text="${req.requestor.fullName}"></td>
+                                    <td th:text="${req.quantity}"></td>
+                                    <td th:text="${req.reason}"></td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(partRequests)}">
+                                    <td colspan="5" class="text-center">No pending stock requests.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                     <div class="mt-3">
+                        <p>To fulfill these requests, please proceed to the Purchase Orders page to create a new order.</p>
+                        <a th:href="@{/warehouse/dashboard}" class="btn btn-primary">Go to Purchase Orders</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
+</body>
+</html>

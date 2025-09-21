@@ -68,6 +68,19 @@
                         </div>
                     </div>
                      <div class="card shadow mb-4">
+                    <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Part Request Status</h6></div>
+                    <div class="card-body">
+                        <ul class="list-group" th:if="${!#lists.isEmpty(repair.partRequests)}">
+                            <li th:each="req : ${repair.partRequests}" class="list-group-item d-flex justify-content-between align-items-center">
+                                <span th:text="${req.part.partName} + ' (Qty: ' + ${req.quantity} + ')'"></span>
+                                <span class="badge" th:classappend="${req.status.name() == 'PENDING'} ? 'bg-warning' : (${req.status.name() == 'FULFILLED'} ? 'bg-success' : 'bg-danger')" th:text="${req.status.name()}"></span>
+                            </li>
+                        </ul>
+                        <p th:if="${#lists.isEmpty(repair.partRequests)}" class="text-muted">No parts have been requested for this repair.</p>
+                    </div>
+                </div>
+                 <!-- Add Reply -->
+                <div class="card shadow mb-4">
                          <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Add Reply to Ticket</h6></div>
                          <div class="card-body">
                              <form th:action="@{/technician/repairs/{id}/reply(id=${repair.repairId})}" th:object="${newResponse}" method="post">

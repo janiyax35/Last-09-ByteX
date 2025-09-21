@@ -7,10 +7,10 @@
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <h1 class="h3 mb-2 text-light">All System Tickets</h1>
-            <p class="mb-4">This page provides a view of every ticket in the system, regardless of assignment.</p>
+            <h1 class="h3 mb-2 text-light">Ticket Monitoring</h1>
+            <p class="mb-4">This page provides a global view of every ticket in the system.</p>
             <div class="card shadow mb-4">
-                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Ticket List</h6></div>
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">All Tickets</h6></div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -28,7 +28,10 @@
                                     <td><span class="badge bg-info" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span></td>
                                     <td th:text="${ticket.priority.name()}"></td>
                                     <td th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
-                                    <td><a th:href="@{/staff/tickets/{id}(id=${ticket.ticketId})}" class="btn btn-info btn-sm">View</a></td>
+                                    <td>
+                                        <!-- Admins can view details from the staff's perspective -->
+                                        <a th:href="@{/staff/tickets/{id}(id=${ticket.ticketId})}" class="btn btn-info btn-sm">View as Staff</a>
+                                    </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(tickets)}"><td colspan="8" class="text-center">No tickets found in the system.</td></tr>
                             </tbody>

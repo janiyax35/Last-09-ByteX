@@ -29,20 +29,24 @@
         <li sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
         <li sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/users}"><i class="fas fa-users-cog"></i> Manage Users</a></li>
         <li sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/logs}"><i class="fas fa-clipboard-list"></i> Activity Logs</a></li>
+        <li sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/tickets}"><i class="fas fa-eye"></i> Monitor Tickets</a></li>
         <!-- Customer Links -->
         <li sec:authorize="hasAuthority('ROLE_CUSTOMER')"><a th:href="@{/customer/dashboard}"><i class="fas fa-tachometer-alt"></i> My Dashboard</a></li>
         <li sec:authorize="hasAuthority('ROLE_CUSTOMER')"><a th:href="@{/customer/tickets/new}"><i class="fas fa-plus-circle"></i> Create New Ticket</a></li>
         <!-- Staff Links -->
         <li sec:authorize="hasAuthority('ROLE_STAFF')"><a th:href="@{/staff/dashboard}"><i class="fas fa-tachometer-alt"></i> Staff Dashboard</a></li>
-        <li sec:authorize="hasAuthority('ROLE_STAFF')"><a th:href="@{/staff/tickets}"><i class="fas fa-ticket-alt"></i> All Tickets</a></li>
+        <li sec:authorize="hasAuthority('ROLE_STAFF')"><a th:href="@{/staff/my-tickets}"><i class="fas fa-ticket-alt"></i> My Tickets</a></li>
         <!-- Technician Links -->
         <li sec:authorize="hasAuthority('ROLE_TECHNICIAN')"><a th:href="@{/technician/dashboard}"><i class="fas fa-wrench"></i> My Repair Jobs</a></li>
         <!-- Product Manager Links -->
-        <li sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')"><a th:href="@{/productmanager/dashboard}"><i class="fas fa-box-open"></i> Inventory Dashboard</a></li>
+        <li sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')"><a th:href="@{/productmanager/dashboard}"><i class="fas fa-box-open"></i> PM Dashboard</a></li>
         <li sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')"><a th:href="@{/productmanager/parts}"><i class="fas fa-boxes"></i> Manage Parts</a></li>
+        <li sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')"><a th:href="@{/productmanager/requests}"><i class="fas fa-inbox"></i> Part Requests</a></li>
+        <li sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')"><a th:href="@{/productmanager/low-stock}"><i class="fas fa-exclamation-triangle"></i> Low Stock</a></li>
         <!-- Warehouse Manager Links -->
         <li sec:authorize="hasAuthority('ROLE_WAREHOUSE_MANAGER')"><a th:href="@{/warehouse/dashboard}"><i class="fas fa-dolly-flatbed"></i> Purchase Orders</a></li>
         <li sec:authorize="hasAuthority('ROLE_WAREHOUSE_MANAGER')"><a th:href="@{/warehouse/suppliers}"><i class="fas fa-truck"></i> Manage Suppliers</a></li>
+        <li sec:authorize="hasAuthority('ROLE_WAREHOUSE_MANAGER')"><a th:href="@{/warehouse/stock-requests}"><i class="fas fa-cubes"></i> Stock Requests</a></li>
     </ul>
 </nav>
 
@@ -62,7 +66,7 @@
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form th:action="@{/logout}" method="post" id="logoutForm" style="display: none;"></form>
-                    <a class="dropdown-item text-danger" href="#" onclick="document.getElementById('logoutForm').submit();">
+                    <a class="dropdown-item text-danger" href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
                         <i class="fas fa-sign-out-alt me-2"></i>Logout
                     </a>
                 </li>

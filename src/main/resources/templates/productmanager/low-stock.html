@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layouts/dashboard-layout :: head('Low Stock Parts')}"></head>
+<body>
+<div class="wrapper">
+    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
+    <div id="content">
+        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
+        <div class="container-fluid">
+            <h1 class="h3 mb-2 text-light">Low & Out of Stock Items</h1>
+            <p class="mb-4">This page lists all parts that have fallen below their minimum stock threshold.</p>
+            <div class="card shadow mb-4">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Inventory Alert</h6></div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                        <thead><tr><th>Part Name</th><th>Part Number</th><th>Current Stock</th><th>Min Stock</th><th>Status</th><th>Action</th></tr></thead>
+                            <tbody>
+                                <tr th:each="part : ${lowStockParts}">
+                                    <td th:text="${part.partName}"></td>
+                                    <td th:text="${part.partNumber}"></td>
+                                    <td th:text="${part.currentStock}"></td>
+                                    <td th:text="${part.minimumStock}"></td>
+                                    <td><span class="badge" th:classappend="${part.status.name() == 'LOW_STOCK'} ? 'bg-warning' : 'bg-danger'" th:text="${part.status.name()}"></span></td>
+                                <td><a th:href="@{/productmanager/parts/{id}/request-restock(id=${part.partId})}" class="btn btn-primary btn-sm">Request Restock</a></td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(lowStockParts)}"><td colspan="5" class="text-center">No items are low on stock.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
+</body>
+</html>

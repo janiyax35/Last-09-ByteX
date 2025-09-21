@@ -20,12 +20,14 @@ public class WarehouseManagerController {
     private final SupplierService supplierService;
     private final UserService userService;
     private final com.bytex.customercaresystem.service.PartService partService;
+    private final com.bytex.customercaresystem.service.PartRequestService partRequestService;
 
-    public WarehouseManagerController(PurchaseOrderService purchaseOrderService, SupplierService supplierService, UserService userService, com.bytex.customercaresystem.service.PartService partService) {
+    public WarehouseManagerController(PurchaseOrderService purchaseOrderService, SupplierService supplierService, UserService userService, com.bytex.customercaresystem.service.PartService partService, com.bytex.customercaresystem.service.PartRequestService partRequestService) {
         this.purchaseOrderService = purchaseOrderService;
         this.supplierService = supplierService;
         this.userService = userService;
         this.partService = partService;
+        this.partRequestService = partRequestService;
     }
 
     private User getLoggedInUser(Authentication authentication) {
@@ -144,5 +146,12 @@ public class WarehouseManagerController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error: This supplier might be linked to existing purchase orders and cannot be deleted.");
         }
         return "redirect:/warehouse/suppliers";
+    }
+
+    @GetMapping("/stock-requests")
+    public String viewStockRequests(Model model) {
+        model.addAttribute("partRequests", partRequestService.findPendingRequests());
+        model.addAttribute("pageTitle", "Stock Replenishment Requests");
+        return "warehouse/stock-requests";
     }
 }

@@ -112,10 +112,11 @@ public class StaffController {
         return "redirect:/staff/dashboard";
     }
 
-    @GetMapping("/tickets")
-    public String viewAllTickets(Model model) {
-        model.addAttribute("tickets", ticketService.findAllTickets());
-        model.addAttribute("pageTitle", "All System Tickets");
-        return "staff/all-tickets";
+    @GetMapping("/my-tickets")
+    public String viewMyTickets(Model model, Authentication authentication) {
+        User staffMember = getLoggedInUser(authentication);
+        model.addAttribute("myTickets", ticketService.findTicketsByAssignedTo(staffMember));
+        model.addAttribute("pageTitle", "My Assigned Tickets");
+        return "staff/my-tickets";
     }
 }

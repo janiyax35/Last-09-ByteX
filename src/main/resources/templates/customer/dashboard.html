@@ -43,9 +43,14 @@
                                         <span class="badge"
                                               th:classappend="${#strings.contains(ticket.status.name(), 'OPEN')} ? 'bg-success' :
                                                              (${#strings.contains(ticket.status.name(), 'PROGRESS')} ? 'bg-info' :
-                                                             (${#strings.contains(ticket.status.name(), 'PENDING')} ? 'bg-warning' : 'bg-secondary'))"
-                                              th:text="${#strings.replace(ticket.status.name(), '_', ' ')}">
-                                            STATUS
+                                                         (${#strings.contains(ticket.status.name(), 'PENDING')} ? 'bg-warning' : 'bg-secondary'))">
+                                        <th:block th:switch="${ticket.status.name()}">
+                                            <span th:case="'IN_PROGRESS'">
+                                                <span th:if="${!#lists.isEmpty(ticket.repairs)}">Assigned to Technician</span>
+                                                <span th:if="${#lists.isEmpty(ticket.repairs)}">In Progress with Staff</span>
+                                            </span>
+                                            <span th:case="*" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span>
+                                        </th:block>
                                         </span>
                                     </td>
                                     <td th:text="${ticket.priority.name()}">HIGH</td>

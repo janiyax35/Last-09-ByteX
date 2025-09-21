@@ -19,13 +19,14 @@ public class PartRequestServiceImpl implements PartRequestService {
     }
 
     @Override
-    public PartRequest createPartRequest(User requestor, Part part, int quantity, String reason) {
+    public PartRequest createPartRequest(User requestor, Part part, int quantity, String reason, com.bytex.customercaresystem.model.Repair repair) {
         PartRequest newRequest = new PartRequest();
         newRequest.setRequestor(requestor);
         newRequest.setPart(part);
         newRequest.setQuantity(quantity);
         newRequest.setReason(reason);
         newRequest.setStatus(PartRequestStatus.PENDING);
+        newRequest.setRepair(repair);
         return partRequestRepository.save(newRequest);
     }
 
