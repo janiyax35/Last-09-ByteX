@@ -1,47 +1,41 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#ticket-form-content})}">
-
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layouts/dashboard-layout :: head('Create New Ticket')}"></head>
 <body>
-
-<div id="ticket-form-content">
-    <div class="container-fluid">
-        <h1 class="h3 mb-2 text-light">Create a New Support Ticket</h1>
-        <p class="mb-4">Please fill out the form below to submit a ticket. Our team will get back to you as soon as possible.</p>
-
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">New Ticket Details</h6>
-            </div>
-            <div class="card-body">
-                <form th:action="@{/customer/tickets/new}" th:object="${ticket}" method="post">
-                    <div class="mb-3">
-                        <label for="subject" class="form-label">Subject</label>
-                        <input type="text" class="form-control" id="subject" th:field="*{subject}" placeholder="e.g., My computer won't turn on" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" th:field="*{description}" rows="6" placeholder="Please describe your issue in detail..." required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="priority" class="form-label">Priority</label>
-                        <select class="form-select" id="priority" th:field="*{priority}" required>
-                            <option value="">Select Priority</option>
-                            <option th:each="p : ${priorities}"
-                                    th:value="${p}"
-                                    th:text="${#strings.capitalize(#strings.toLowerCase(p.name()))}">
-                                Priority
-                            </option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Submit Ticket</button>
-                    <a th:href="@{/customer/dashboard}" class="btn btn-secondary">Cancel</a>
-                </form>
+<div class="wrapper">
+    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
+    <div id="content">
+        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
+        <div class="container-fluid">
+            <h1 class="h3 mb-2 text-light">Create a New Support Ticket</h1>
+            <p class="mb-4">Please fill out the form below to submit a ticket. Our team will get back to you as soon as possible.</p>
+            <div class="card shadow mb-4">
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">New Ticket Details</h6></div>
+                <div class="card-body">
+                    <form th:action="@{/customer/tickets/new}" th:object="${ticket}" method="post">
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" th:field="*{subject}" placeholder="e.g., My computer won't turn on" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" th:field="*{description}" rows="6" placeholder="Please describe your issue in detail..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" th:field="*{priority}" required>
+                                <option value="">Select Priority</option>
+                                <option th:each="p : ${priorities}" th:value="${p}" th:text="${#strings.capitalize(#strings.toLowerCase(p.name()))}"></option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Ticket</button>
+                        <a th:href="@{/customer/dashboard}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
+<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
 </body>
 </html>

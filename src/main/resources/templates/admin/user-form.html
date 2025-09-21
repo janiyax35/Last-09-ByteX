@@ -1,59 +1,66 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#user-form-content})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/dashboard-layout :: head(${pageTitle})}"></head>
 
 <body>
+<div class="wrapper">
+    <!-- Sidebar -->
+    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
 
-<div id="user-form-content">
-    <div class="container-fluid">
-        <h1 class="h3 mb-2 text-light" th:text="${pageTitle}">Add/Edit User</h1>
+    <!-- Page Content -->
+    <div id="content">
+        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
 
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">User Details</h6>
-            </div>
-            <div class="card-body">
-                <!-- Display error messages if redirected from a failed save -->
-                <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+        <div class="container-fluid">
+            <h1 class="h3 mb-2 text-light" th:text="${pageTitle}">Add/Edit User</h1>
 
-                <form th:action="${user.userId == null} ? @{/admin/users/add} : @{/admin/users/edit/{id}(id=${user.userId})}" th:object="${user}" method="post">
-                    <input type="hidden" th:field="*{userId}" />
-
-                    <div class="mb-3">
-                        <label for="fullName" class="form-label">Full Name</label>
-                        <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" th:field="*{username}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" th:field="*{email}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" th:field="*{password}" th:placeholder="${user.userId == null} ? 'Enter password' : 'Leave blank to keep current password'">
-                    </div>
-                    <div class="mb-3">
-                        <label for="role" class="form-label">Role</label>
-                        <select class="form-select" id="role" th:field="*{role}" required>
-                            <option value="">Select a Role</option>
-                            <option th:each="roleOpt : ${roles}"
-                                    th:value="${roleOpt}"
-                                    th:text="${#strings.capitalize(#strings.toLowerCase(roleOpt.name().replace('_', ' ')))}">
-                                Role
-                            </option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Save User</button>
-                    <a th:href="@{/admin/users}" class="btn btn-secondary">Cancel</a>
-                </form>
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">User Details</h6>
+                </div>
+                <div class="card-body">
+                    <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+                    <form th:action="${user.userId == null} ? @{/admin/users/add} : @{/admin/users/edit/{id}(id=${user.userId})}" th:object="${user}" method="post">
+                        <input type="hidden" th:field="*{userId}" />
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" th:field="*{username}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" th:field="*{password}" th:placeholder="${user.userId == null} ? 'Enter password' : 'Leave blank to keep current password'">
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-select" id="role" th:field="*{role}" required>
+                                <option value="">Select a Role</option>
+                                <option th:each="roleOpt : ${roles}"
+                                        th:value="${roleOpt}"
+                                        th:text="${#strings.capitalize(#strings.toLowerCase(roleOpt.name().replace('_', ' ')))}">
+                                    Role
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save User</button>
+                        <a th:href="@{/admin/users}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Scripts -->
+<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
 
 </body>
 </html>

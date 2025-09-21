@@ -1,39 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#supplier-form-content})}">
-
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layouts/dashboard-layout :: head(${pageTitle})}"></head>
 <body>
-
-<div id="supplier-form-content">
-    <div class="container-fluid">
-        <h1 class="h3 mb-2 text-light" th:text="${pageTitle}">Add/Edit Supplier</h1>
-
-        <div class="card shadow mb-4">
-            <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Supplier Details</h6></div>
-            <div class="card-body">
-                <form th:action="@{/warehouse/suppliers/add}" th:object="${supplier}" method="post">
-                    <input type="hidden" th:field="*{supplierId}" />
-
-                    <div class="mb-3">
-                        <label for="supplierName" class="form-label">Supplier Name</label>
-                        <input type="text" class="form-control" th:field="*{supplierName}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="contactInfo" class="form-label">Contact Info (Email/Phone)</label>
-                        <input type="text" class="form-control" th:field="*{contactInfo}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Address</label>
-                        <textarea class="form-control" rows="3" th:field="*{address}"></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Save Supplier</button>
-                    <a th:href="@{/warehouse/suppliers}" class="btn btn-secondary">Cancel</a>
-                </form>
+<div class="wrapper">
+    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
+    <div id="content">
+        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
+        <div class="container-fluid">
+            <h1 class="h3 mb-2 text-light" th:text="${pageTitle}">Add/Edit Supplier</h1>
+            <div class="card shadow mb-4">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Supplier Details</h6></div>
+                <div class="card-body">
+                    <form th:action="@{/warehouse/suppliers/add}" th:object="${supplier}" method="post">
+                        <input type="hidden" th:field="*{supplierId}" />
+                        <div class="mb-3">
+                            <label for="supplierName" class="form-label">Supplier Name</label>
+                            <input type="text" class="form-control" th:field="*{supplierName}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactInfo" class="form-label">Contact Info (Email/Phone)</label>
+                            <input type="text" class="form-control" th:field="*{contactInfo}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" rows="3" th:field="*{address}"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Supplier</button>
+                        <a th:href="@{/warehouse/suppliers}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
+<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
 </body>
 </html>
