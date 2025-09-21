@@ -64,8 +64,11 @@
             </li>
 
             <!-- Warehouse Manager Links -->
-            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/warehouse/dashboard')} ? 'active' : ''" sec:authorize="hasAuthority('WAREHOUSE_MANAGER')">
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/warehouse/dashboard') or #strings.contains(#httpServletRequest.requestURI, '/warehouse/orders')} ? 'active' : ''" sec:authorize="hasAuthority('WAREHOUSE_MANAGER')">
                 <a th:href="@{/warehouse/dashboard}"><i class="fas fa-dolly-flatbed"></i> Purchase Orders</a>
+            </li>
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/warehouse/suppliers')} ? 'active' : ''" sec:authorize="hasAuthority('WAREHOUSE_MANAGER')">
+                <a th:href="@{/warehouse/suppliers}"><i class="fas fa-truck"></i> Manage Suppliers</a>
             </li>
 
         </ul>

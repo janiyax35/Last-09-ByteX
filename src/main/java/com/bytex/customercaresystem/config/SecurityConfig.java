@@ -36,12 +36,12 @@ public class SecurityConfig {
                 // Publicly accessible URLs
                 .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/images/**", "/webfonts/**", "/favicon.ico").permitAll()
                 // Role-based authorization
-                .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                .requestMatchers("/staff/**").hasAuthority("STAFF")
-                .requestMatchers("/technician/**").hasAuthority("TECHNICIAN")
-                .requestMatchers("/productmanager/**").hasAuthority("PRODUCT_MANAGER")
-                .requestMatchers("/warehouse/**").hasAuthority("WAREHOUSE_MANAGER")
-                .requestMatchers("/customer/**").hasAuthority("CUSTOMER")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/staff/**").hasRole("STAFF")
+                .requestMatchers("/technician/**").hasRole("TECHNICIAN")
+                .requestMatchers("/productmanager/**").hasRole("PRODUCT_MANAGER")
+                .requestMatchers("/warehouse/**").hasRole("WAREHOUSE_MANAGER")
+                .requestMatchers("/customer/**").hasRole("CUSTOMER")
                 // All other requests must be authenticated
                 .anyRequest().authenticated()
             )

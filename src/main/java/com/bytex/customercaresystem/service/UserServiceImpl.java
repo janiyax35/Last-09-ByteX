@@ -72,12 +72,11 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id, User userWithUpdates) throws Exception {
         User existingUser = findById(id).orElseThrow(() -> new Exception("User not found with id: " + id));
 
-        // Check for username uniqueness if it has changed
+        // Prevent username changes from the profile update form
         if (!existingUser.getUsername().equals(userWithUpdates.getUsername())) {
-            if (userRepository.findByUsername(userWithUpdates.getUsername()).isPresent()) {
-                throw new Exception("Error: Username is already taken!");
-            }
-            existingUser.setUsername(userWithUpdates.getUsername());
+            // This case should ideally not be reached if the form field is readonly,
+            // but as a security measure, we can log it or throw an exception.
+            // For now, we will simply ignore the change and not update the username.
         }
 
         // Check for email uniqueness if it has changed

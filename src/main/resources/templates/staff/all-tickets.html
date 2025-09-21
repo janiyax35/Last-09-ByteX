@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#all-tickets-content})}">
+
+<body>
+
+<div id="all-tickets-content">
+    <div class="container-fluid">
+        <h1 class="h3 mb-2 text-light">All System Tickets</h1>
+        <p class="mb-4">This page provides a view of every ticket in the system, regardless of assignment.</p>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Ticket List</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Subject</th>
+                                <th>Customer</th>
+                                <th>Assigned To</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Last Updated</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ticket : ${tickets}">
+                                <td th:text="${ticket.ticketId}"></td>
+                                <td th:text="${ticket.subject}"></td>
+                                <td th:text="${ticket.customer.fullName}"></td>
+                                <td th:text="${ticket.assignedTo != null} ? ${ticket.assignedTo.fullName} : 'Unassigned'"></td>
+                                <td><span class="badge bg-info" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span></td>
+                                <td th:text="${ticket.priority.name()}"></td>
+                                <td th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
+                                <td>
+                                    <a th:href="@{/staff/tickets/{id}(id=${ticket.ticketId})}" class="btn btn-info btn-sm">View</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(tickets)}">
+                                <td colspan="8" class="text-center">No tickets found in the system.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

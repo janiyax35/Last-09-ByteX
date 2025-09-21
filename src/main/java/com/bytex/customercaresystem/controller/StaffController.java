@@ -111,4 +111,11 @@ public class StaffController {
         redirectAttributes.addFlashAttribute("successMessage", "Ticket #" + id + " has been archived.");
         return "redirect:/staff/dashboard";
     }
+
+    @GetMapping("/tickets")
+    public String viewAllTickets(Model model) {
+        model.addAttribute("tickets", ticketService.findAllTickets());
+        model.addAttribute("pageTitle", "All System Tickets");
+        return "staff/all-tickets";
+    }
 }
