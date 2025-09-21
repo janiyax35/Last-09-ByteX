@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#staff-ticket-details-content})}">
+
+<body>
+
+<div id="staff-ticket-details-content">
+    <div class="container-fluid">
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+        <!-- Top Header -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-light" th:text="'Manage Ticket #' + ${ticket.ticketId}">Manage Ticket</h1>
+            <a th:href="@{/staff/dashboard}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Ticket Info & Responses -->
+            <div class="col-lg-7">
+                <!-- Ticket Details -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary" th:text="${ticket.subject}">Ticket Subject</h6></div>
+                    <div class="card-body">
+                        <p><strong>Customer:</strong> <span th:text="${ticket.customer.fullName}"></span></p>
+                        <p><strong>Status:</strong> <span class="badge bg-info" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span></p>
+                        <p><strong>Priority:</strong> <span th:text="${ticket.priority.name()}"></span></p>
+                        <p><strong>Description:</strong> <span th:text="${ticket.description}"></span></p>
+                    </div>
+                </div>
+
+                <!-- Conversation -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Conversation History</h6></div>
+                    <div class="card-body">
+                        <div th:each="response : ${ticket.responses}" class="mb-3 border-bottom pb-3">
+                             <strong><i class="fas fa-user"></i> <span th:text="${response.user.fullName}"></span></strong>:
+                             <p class="mt-1" th:text="${response.message}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Actions -->
+            <div class="col-lg-5">
+                <!-- Add Reply -->
+                <div class="card shadow mb-4">
+                     <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Add Reply</h6></div>
+                     <div class="card-body">
+                         <form th:action="@{/staff/tickets/{id}/reply(id=${ticket.ticketId})}" th:object="${newResponse}" method="post">
+                             <textarea class="form-control" rows="4" th:field="*{message}" placeholder="Type your response..."></textarea>
+                             <button type="submit" class="btn btn-primary mt-2">Post Reply</button>
+                         </form>
+                     </div>
+                </div>
+
+                <!-- Update Status -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Update Status</h6></div>
+                    <div class="card-body">
+                        <form th:action="@{/staff/tickets/{id}/status(id=${ticket.ticketId})}" method="post">
+                            <select name="status" class="form-select">
+                                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.name()}" th:selected="${s == ticket.status}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-info mt-2">Update Status</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Escalate to Technician -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Escalate to Technician</h6></div>
+                    <div class="card-body">
+                        <form th:action="@{/staff/tickets/{id}/escalate(id=${ticket.ticketId})}" method="post">
+                            <div class="mb-2">
+                                <label>Technician:</label>
+                                <select name="technicianId" class="form-select">
+                                    <option value="">Select a Technician</option>
+                                    <option th:each="tech : ${technicians}" th:value="${tech.userId}" th:text="${tech.fullName}"></option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label>Initial Diagnosis:</label>
+                                <textarea name="diagnosis" class="form-control" rows="3" placeholder="Describe the technical issue..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-warning">Escalate</button>
+                        </form>
+                    </div>
+                </div>
+                 <!-- Archive -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Archive Ticket</h6></div>
+                    <div class="card-body">
+                        <p>Once a ticket is resolved and closed, you can archive it to remove it from active lists.</p>
+                        <a th:href="@{/staff/tickets/{id}/archive(id=${ticket.ticketId})}" class="btn btn-secondary">Archive this Ticket</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

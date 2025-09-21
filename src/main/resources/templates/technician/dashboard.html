@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#technician-dashboard-content})}">
+
+<body>
+
+<div id="technician-dashboard-content">
+    <div class="container-fluid">
+        <h1 class="h3 mb-2 text-light">My Repair Jobs</h1>
+        <p class="mb-4">This is a list of all technical repair jobs assigned to you.</p>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Assigned Repairs</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Repair ID</th>
+                                <th>Ticket Subject</th>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Assigned Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="repair : ${repairs}">
+                                <td th:text="${repair.repairId}">1</td>
+                                <td th:text="${repair.ticket.subject}">PC is slow</td>
+                                <td th:text="${repair.ticket.customer.fullName}">John Doe</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${#strings.contains(repair.status.name(), 'PENDING')} ? 'bg-secondary' :
+                                                         (${#strings.contains(repair.status.name(), 'PROGRESS')} ? 'bg-info' :
+                                                         (${#strings.contains(repair.status.name(), 'WAITING')} ? 'bg-warning' : 'bg-success'))"
+                                          th:text="${#strings.replace(repair.status.name(), '_', ' ')}">
+                                        STATUS
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(repair.startDate, 'yyyy-MM-dd HH:mm')}"></td>
+                                <td>
+                                    <a th:href="@{/technician/repairs/{id}(id=${repair.repairId})}" class="btn btn-info btn-sm">View Details</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(repairs)}">
+                                <td colspan="6" class="text-center">You have no repair jobs assigned to you.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

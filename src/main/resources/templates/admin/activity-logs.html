@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle='System Activity Logs', content=~{::#logs-content})}">
+
+<body>
+
+<div id="logs-content">
+    <div class="container-fluid">
+        <h1 class="h3 mb-2 text-light">System Activity Logs</h1>
+        <p class="mb-4">This page shows a chronological record of important actions taken within the system.</p>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Activity Feed</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Description</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="log : ${logs}">
+                                <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2025-01-01 12:00:00</td>
+                                <td>
+                                    <span th:if="${log.user != null}" th:text="${log.user.username}">admin</span>
+                                    <span th:if="${log.user == null}" class="text-muted">SYSTEM</span>
+                                </td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${#strings.contains(log.actionType, 'CREATE')} ? 'bg-success' :
+                                                         (${#strings.contains(log.actionType, 'UPDATE')} ? 'bg-info' :
+                                                         (${#strings.contains(log.actionType, 'DELETE')} ? 'bg-danger' : 'bg-secondary'))"
+                                          th:text="${log.actionType}">
+                                        ACTION
+                                    </span>
+                                </td>
+                                <td th:text="${log.description}">Log description goes here.</td>
+                                <td th:text="${log.ipAddress}">127.0.0.1</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(logs)}">
+                                <td colspan="5" class="text-center">No activity logs found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

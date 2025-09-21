@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' | ByteX Dashboard'"></title>
+
+    <!-- Shared Head Content -->
+    <th:block th:replace="~{fragments/header :: head(pageTitle)}"></th:block>
+
+    <!-- Dashboard Specific CSS -->
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- Sidebar -->
+    <nav id="sidebar" th:fragment="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-cogs"></i> ByteX System</h3>
+        </div>
+
+        <ul class="list-unstyled components">
+            <p sec:authentication="name" class="text-center fw-bold"></p>
+
+            <!-- Admin Links -->
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/dashboard')} ? 'active' : ''" sec:authorize="hasAuthority('ADMIN')">
+                <a th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            </li>
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/users')} ? 'active' : ''" sec:authorize="hasAuthority('ADMIN')">
+                <a th:href="@{/admin/users}"><i class="fas fa-users-cog"></i> Manage Users</a>
+            </li>
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/logs')} ? 'active' : ''" sec:authorize="hasAuthority('ADMIN')">
+                <a th:href="@{/admin/logs}"><i class="fas fa-clipboard-list"></i> Activity Logs</a>
+            </li>
+
+            <!-- Customer Links -->
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/customer/dashboard')} ? 'active' : ''" sec:authorize="hasAuthority('CUSTOMER')">
+                <a th:href="@{/customer/dashboard}"><i class="fas fa-tachometer-alt"></i> My Dashboard</a>
+            </li>
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/customer/tickets/new')} ? 'active' : ''" sec:authorize="hasAuthority('CUSTOMER')">
+                <a th:href="@{/customer/tickets/new}"><i class="fas fa-plus-circle"></i> Create New Ticket</a>
+            </li>
+
+            <!-- Staff Links -->
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/staff/dashboard')} ? 'active' : ''" sec:authorize="hasAuthority('STAFF')">
+                <a th:href="@{/staff/dashboard}"><i class="fas fa-tachometer-alt"></i> Staff Dashboard</a>
+            </li>
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/staff/tickets')} ? 'active' : ''" sec:authorize="hasAuthority('STAFF')">
+                <a th:href="@{/staff/tickets}"><i class="fas fa-ticket-alt"></i> All Tickets</a>
+            </li>
+
+            <!-- Technician Links -->
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/technician/dashboard')} ? 'active' : ''" sec:authorize="hasAuthority('TECHNICIAN')">
+                <a th:href="@{/technician/dashboard}"><i class="fas fa-wrench"></i> My Repair Jobs</a>
+            </li>
+
+            <!-- Product Manager Links -->
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/productmanager/dashboard')} ? 'active' : ''" sec:authorize="hasAuthority('PRODUCT_MANAGER')">
+                <a th:href="@{/productmanager/dashboard}"><i class="fas fa-box-open"></i> Inventory Dashboard</a>
+            </li>
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/productmanager/parts')} ? 'active' : ''" sec:authorize="hasAuthority('PRODUCT_MANAGER')">
+                <a th:href="@{/productmanager/parts}"><i class="fas fa-boxes"></i> Manage Parts</a>
+            </li>
+
+            <!-- Warehouse Manager Links -->
+            <li th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/warehouse/dashboard')} ? 'active' : ''" sec:authorize="hasAuthority('WAREHOUSE_MANAGER')">
+                <a th:href="@{/warehouse/dashboard}"><i class="fas fa-dolly-flatbed"></i> Purchase Orders</a>
+            </li>
+
+        </ul>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button type="button" id="sidebarCollapse" class="btn btn-info">
+                    <i class="fas fa-align-left"></i>
+                </button>
+                <div class="ms-auto nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i>
+                        <span sec:authentication="name">User</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                        <li><a class="dropdown-item" th:href="@{/profile}"><i class="fas fa-user-edit me-2"></i>My Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" th:href="@{/logout}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main content of the specific page is inserted here -->
+        <div th:replace="${content}">
+            <!-- Placeholder for content from other templates -->
+        </div>
+
+    </div>
+</div>
+
+<!-- Shared Scripts -->
+<div th:replace="~{fragments/footer :: scripts}"></div>
+<!-- Custom script for sidebar toggle -->
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById('sidebarCollapse').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('content').classList.toggle('active');
+        });
+    });
+</script>
+
+</body>
+</html>

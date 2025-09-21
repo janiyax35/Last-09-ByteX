@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle='Manage Users', content=~{::#manage-users-content})}">
+
+<body>
+
+<div id="manage-users-content">
+    <div class="container-fluid">
+        <h1 class="h3 mb-2 text-light">User Management</h1>
+        <p class="mb-4">From this page, you can create, update, and delete user accounts for staff and technicians.</p>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">All System Users</h6>
+                <a th:href="@{/admin/users/add}" class="btn btn-primary">
+                    <i class="fas fa-plus fa-sm text-white-50"></i> Add New User
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td th:text="${user.fullName}">Default Name</td>
+                                <td th:text="${user.username}">default.user</td>
+                                <td th:text="${user.email}">default@email.com</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${user.role.name() == 'ADMIN'} ? 'bg-danger' :
+                                                         (${user.role.name() == 'STAFF'} ? 'bg-info' :
+                                                         (${user.role.name() == 'TECHNICIAN'} ? 'bg-warning' : 'bg-secondary'))"
+                                          th:text="${user.role.name().replace('_', ' ')}">
+                                        ROLE
+                                    </span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/users/edit/{id}(id=${user.userId})}" class="btn btn-warning btn-sm" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a th:href="@{/admin/users/delete/{id}(id=${user.userId})}" class="btn btn-danger btn-sm" title="Delete"
+                                       onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');"
+                                       th:if="${user.role.name() != 'ADMIN'}"> <!-- Prevent admin from deleting themselves -->
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
