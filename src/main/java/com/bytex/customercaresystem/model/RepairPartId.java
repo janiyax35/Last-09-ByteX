@@ -2,17 +2,10 @@ package com.bytex.customercaresystem.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class RepairPartId implements Serializable {
 
     @Column(name = "repair_id")
@@ -21,6 +14,33 @@ public class RepairPartId implements Serializable {
     @Column(name = "part_id")
     private Long partId;
 
+    // Constructors
+    public RepairPartId() {
+    }
+
+    public RepairPartId(Long repairId, Long partId) {
+        this.repairId = repairId;
+        this.partId = partId;
+    }
+
+    // Getters and Setters
+    public Long getRepairId() {
+        return repairId;
+    }
+
+    public void setRepairId(Long repairId) {
+        this.repairId = repairId;
+    }
+
+    public Long getPartId() {
+        return partId;
+    }
+
+    public void setPartId(Long partId) {
+        this.partId = partId;
+    }
+
+    // equals and hashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

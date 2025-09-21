@@ -2,17 +2,10 @@ package com.bytex.customercaresystem.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class OrderItemId implements Serializable {
 
     @Column(name = "order_id")
@@ -21,6 +14,33 @@ public class OrderItemId implements Serializable {
     @Column(name = "part_id")
     private Long partId;
 
+    // Constructors
+    public OrderItemId() {
+    }
+
+    public OrderItemId(Long orderId, Long partId) {
+        this.orderId = orderId;
+        this.partId = partId;
+    }
+
+    // Getters and Setters
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
+    public Long getPartId() {
+        return partId;
+    }
+
+    public void setPartId(Long partId) {
+        this.partId = partId;
+    }
+
+    // equals and hashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

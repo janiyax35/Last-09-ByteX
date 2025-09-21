@@ -1,19 +1,14 @@
 package com.bytex.customercaresystem.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "repairs")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Repair {
 
     @Id
@@ -46,4 +41,104 @@ public class Repair {
 
     @OneToMany(mappedBy = "repair", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RepairPart> repairParts;
+
+    // Constructors
+    public Repair() {
+    }
+
+    // Getters and Setters
+    public Long getRepairId() {
+        return repairId;
+    }
+
+    public void setRepairId(Long repairId) {
+        this.repairId = repairId;
+    }
+
+    public Ticket getTicket() {
+        return ticket;
+    }
+
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
+    }
+
+    public User getTechnician() {
+        return technician;
+    }
+
+    public void setTechnician(User technician) {
+        this.technician = technician;
+    }
+
+    public String getDiagnosis() {
+        return diagnosis;
+    }
+
+    public void setDiagnosis(String diagnosis) {
+        this.diagnosis = diagnosis;
+    }
+
+    public String getRepairDetails() {
+        return repairDetails;
+    }
+
+    public void setRepairDetails(String repairDetails) {
+        this.repairDetails = repairDetails;
+    }
+
+    public RepairStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RepairStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDateTime getCompletionDate() {
+        return completionDate;
+    }
+
+    public void setCompletionDate(LocalDateTime completionDate) {
+        this.completionDate = completionDate;
+    }
+
+    public Set<RepairPart> getRepairParts() {
+        return repairParts;
+    }
+
+    public void setRepairParts(Set<RepairPart> repairParts) {
+        this.repairParts = repairParts;
+    }
+
+    // equals, hashCode, toString
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Repair repair = (Repair) o;
+        return Objects.equals(repairId, repair.repairId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(repairId);
+    }
+
+    @Override
+    public String toString() {
+        return "Repair{" +
+                "repairId=" + repairId +
+                ", ticketId=" + (ticket != null ? ticket.getTicketId() : "null") +
+                ", status=" + status +
+                '}';
+    }
 }
