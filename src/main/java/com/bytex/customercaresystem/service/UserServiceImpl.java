@@ -72,11 +72,11 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id, User userWithUpdates) throws Exception {
         User existingUser = findById(id).orElseThrow(() -> new Exception("User not found with id: " + id));
 
-        // Prevent username changes from the profile update form
+        // The username from the submitted form is ignored to prevent users from changing their own username.
+        // This is a security measure to prevent session or authority-related issues.
+        // The form input for username is also set to readonly as a UI deterrent.
         if (!existingUser.getUsername().equals(userWithUpdates.getUsername())) {
-            // This case should ideally not be reached if the form field is readonly,
-            // but as a security measure, we can log it or throw an exception.
-            // For now, we will simply ignore the change and not update the username.
+            // We do not update the username: existingUser.setUsername(userWithUpdates.getUsername());
         }
 
         // Check for email uniqueness if it has changed

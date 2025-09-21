@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="wrapper(pageTitle, content)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle} + ' | ByteX Dashboard'"></title>
 
     <!-- Shared Head Content -->
-    <th:block th:replace="~{fragments/header :: head(pageTitle)}"></th:block>
+    <th:block th:replace="~{fragments/header :: head(${pageTitle})}"></th:block>
 
     <!-- Dashboard Specific CSS -->
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
@@ -96,7 +97,7 @@
         </nav>
 
         <!-- Main content of the specific page is inserted here -->
-        <div th:replace="${content}">
+        <div th:replace="~{${content}}">
             <!-- Placeholder for content from other templates -->
         </div>
 
