@@ -13,6 +13,10 @@
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary" th:text="'Ticket #' + ${ticket.ticketId} + ' - ' + ${ticket.subject}">Ticket Details</h6>
                     <div>
+                    <a th:if="${ticket.status.name() == 'OPEN'}" th:href="@{/customer/tickets/{id}/edit(id=${ticket.ticketId})}"
+                       class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit Ticket
+                    </a>
                         <a th:if="${ticket.status.name() == 'OPEN'}" th:href="@{/customer/tickets/{id}/cancel(id=${ticket.ticketId})}"
                            class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this ticket?');">
                             <i class="fas fa-times"></i> Cancel Ticket
@@ -22,7 +26,18 @@
                 </div>
                 <div class="card-body">
                     <p><strong>Status:</strong>
-                        <span class="badge" th:classappend="${#strings.contains(ticket.status.name(), 'OPEN')} ? 'bg-success' : (${#strings.contains(ticket.status.name(), 'PROGRESS')} ? 'bg-info' : (${#strings.contains(ticket.status.name(), 'PENDING')} ? 'bg-warning' : 'bg-secondary'))" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span>
+                        <span class="badge"
+                              th:classappend="${#strings.contains(ticket.status.name(), 'OPEN')} ? 'bg-success' :
+                                         (${#strings.contains(ticket.status.name(), 'PROGRESS')} ? 'bg-info' :
+                                         (${#strings.contains(ticket.status.name(), 'PENDING')} ? 'bg-warning' : 'bg-secondary'))">
+                            <th:block th:switch="${ticket.status.name()}">
+                                <span th:case="'IN_PROGRESS'">
+                                    <span th:if="${!#lists.isEmpty(ticket.repairs)}">Assigned to Technician</span>
+                                    <span th:if="${#lists.isEmpty(ticket.repairs)}">In Progress with Staff</span>
+                                </span>
+                                <span th:case="*" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span>
+                            </th:block>
+                        </span>
                     </p>
                     <p><strong>Priority:</strong> <span th:text="${ticket.priority.name()}"></span></p>
                     <p><strong>Created:</strong> <span th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
@@ -32,6 +47,15 @@
                     <p th:text="${ticket.description}"></p>
                 </div>
             </div>
+
+            <!-- Technician Notes -->
+            <div class="card shadow mb-4" th:if="${!#lists.isEmpty(ticket.repairs)}">
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Technician Notes</h6></div>
+                <div class="card-body">
+                    <pre th:text="${ticket.repairs[0].repairDetails} ?: 'The technician has not added any notes yet.'"></pre>
+                </div>
+            </div>
+
             <div class="card shadow mb-4">
                 <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Conversation History</h6></div>
                 <div class="card-body">

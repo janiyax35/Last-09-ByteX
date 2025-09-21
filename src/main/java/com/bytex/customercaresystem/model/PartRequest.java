@@ -37,6 +37,10 @@ public class PartRequest {
 
     private LocalDateTime fulfillmentDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "repair_id")
+    private Repair repair;
+
     // Constructors
     public PartRequest() {
     }
@@ -104,6 +108,14 @@ public class PartRequest {
 
     public void setFulfillmentDate(LocalDateTime fulfillmentDate) {
         this.fulfillmentDate = fulfillmentDate;
+    }
+
+    public Repair getRepair() {
+        return repair;
+    }
+
+    public void setRepair(Repair repair) {
+        this.repair = repair;
     }
 
     // equals, hashCode, toString

@@ -14,7 +14,7 @@ public interface PartRequestService {
      * @param reason A reason or justification for the request.
      * @return The newly created PartRequest object.
      */
-    PartRequest createPartRequest(User requestor, Part part, int quantity, String reason);
+    PartRequest createPartRequest(User requestor, Part part, int quantity, String reason, com.bytex.customercaresystem.model.Repair repair);
 
     /**
      * Finds all part requests that are pending.

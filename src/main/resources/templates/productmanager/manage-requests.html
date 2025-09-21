@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layouts/dashboard-layout :: head('Part Requests')}"></head>
+<body>
+<div class="wrapper">
+    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
+    <div id="content">
+        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
+        <div class="container-fluid">
+            <h1 class="h3 mb-2 text-light">Manage Part Requests</h1>
+            <p class="mb-4">Approve or reject incoming part requests from technicians.</p>
+            <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+            <div class="card shadow mb-4">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Pending Part Requests</h6></div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead><tr><th>Part Name</th><th>Requested By</th><th>Quantity</th><th>Reason</th><th>Action</th></tr></thead>
+                            <tbody>
+                                <tr th:each="req : ${pendingRequests}">
+                                    <td th:text="${req.part.partName}"></td>
+                                    <td th:text="${req.requestor.fullName}"></td>
+                                    <td th:text="${req.quantity}"></td>
+                                    <td th:text="${req.reason}"></td>
+                                    <td>
+                                        <a th:href="@{/productmanager/requests/{id}/approve(id=${req.requestId})}" class="btn btn-success btn-sm">Approve</a>
+                                        <a th:href="@{/productmanager/requests/{id}/reject(id=${req.requestId})}" class="btn btn-danger btn-sm">Reject</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(pendingRequests)}"><td colspan="5" class="text-center">No pending part requests.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
+</body>
+</html>

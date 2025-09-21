@@ -112,4 +112,35 @@ public class CustomerController {
         }
         return "redirect:/customer/dashboard";
     }
+
+    @GetMapping("/tickets/{id}/edit")
+    public String showEditTicketForm(@PathVariable Long id, Model model, Authentication authentication) {
+        User customer = getLoggedInUser(authentication);
+        Ticket ticket = ticketService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid ticket Id:" + id));
+        // Security check: ensure the customer owns this ticket and it is open
+        if (!ticket.getCustomer().getUserId().equals(customer.getUserId()) || ticket.getStatus() != com.bytex.customercaresystem.model.TicketStatus.OPEN) {
+            return "redirect:/customer/dashboard?error=access_denied";
+        }
+        model.addAttribute("ticket", ticket);
+        model.addAttribute("priorities", com.bytex.customercaresystem.model.TicketPriority.values());
+        model.addAttribute("pageTitle", "Edit Ticket");
+        return "customer/ticket-form"; // Re-use the same form
+    }
+
+    @PostMapping("/tickets/{id}/edit")
+    public String updateTicket(@PathVariable Long id, Ticket ticket, Authentication authentication, RedirectAttributes redirectAttributes) {
+        User customer = getLoggedInUser(authentication);
+        Ticket existingTicket = ticketService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid ticket Id:" + id));
+        if (!existingTicket.getCustomer().getUserId().equals(customer.getUserId()) || existingTicket.getStatus() != com.bytex.customercaresystem.model.TicketStatus.OPEN) {
+            redirectAttributes.addFlashAttribute("errorMessage", "You are not authorized to edit this ticket.");
+            return "redirect:/customer/dashboard";
+        }
+        // Update fields
+        existingTicket.setSubject(ticket.getSubject());
+        existingTicket.setDescription(ticket.getDescription());
+        existingTicket.setPriority(ticket.getPriority());
+        ticketService.saveTicket(existingTicket);
+        redirectAttributes.addFlashAttribute("successMessage", "Ticket updated successfully.");
+        return "redirect:/customer/tickets/" + id;
+    }
 }

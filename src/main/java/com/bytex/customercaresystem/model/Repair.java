@@ -42,6 +42,9 @@ public class Repair {
     @OneToMany(mappedBy = "repair", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RepairPart> repairParts;
 
+    @OneToMany(mappedBy = "repair", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<PartRequest> partRequests;
+
     // Constructors
     public Repair() {
     }
@@ -117,6 +120,14 @@ public class Repair {
 
     public void setRepairParts(Set<RepairPart> repairParts) {
         this.repairParts = repairParts;
+    }
+
+    public java.util.List<PartRequest> getPartRequests() {
+        return partRequests;
+    }
+
+    public void setPartRequests(java.util.List<PartRequest> partRequests) {
+        this.partRequests = partRequests;
     }
 
     // equals, hashCode, toString

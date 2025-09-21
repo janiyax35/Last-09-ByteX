@@ -1,13 +1,17 @@
 package com.bytex.customercaresystem.controller;
 
+import com.bytex.customercaresystem.model.PartRequest;
+import com.bytex.customercaresystem.model.User;
 import com.bytex.customercaresystem.service.PartRequestService;
 import com.bytex.customercaresystem.service.PartService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -16,10 +20,18 @@ public class ProductManagerController {
 
     private final PartService partService;
     private final PartRequestService partRequestService;
+    private final com.bytex.customercaresystem.service.UserService userService;
 
-    public ProductManagerController(PartService partService, PartRequestService partRequestService) {
+    public ProductManagerController(PartService partService, PartRequestService partRequestService, com.bytex.customercaresystem.service.UserService userService) {
         this.partService = partService;
         this.partRequestService = partRequestService;
+        this.userService = userService;
+    }
+
+    private com.bytex.customercaresystem.model.User getLoggedInUser(Authentication authentication) {
+        String username = authentication.getName();
+        return userService.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found in database"));
     }
 
     @GetMapping("/dashboard")
@@ -92,5 +104,38 @@ public class ProductManagerController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
         return "redirect:/productmanager/parts";
+    }
+
+    @GetMapping("/requests")
+    public String viewPartRequests(Model model) {
+        model.addAttribute("pendingRequests", partRequestService.findPendingRequests());
+        model.addAttribute("pageTitle", "Part Requests");
+        return "productmanager/manage-requests";
+    }
+
+    @GetMapping("/low-stock")
+    public String viewLowStock(Model model) {
+        model.addAttribute("lowStockParts", partService.findLowStockParts());
+        model.addAttribute("pageTitle", "Low Stock Parts");
+        return "productmanager/low-stock";
+    }
+
+    @GetMapping("/parts/{id}/request-restock")
+    public String showRestockForm(@PathVariable Long id, Model model) {
+        com.bytex.customercaresystem.model.Part part = partService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid part Id:" + id));
+        PartRequest partRequest = new PartRequest();
+        partRequest.setPart(part);
+        model.addAttribute("partRequest", partRequest);
+        model.addAttribute("pageTitle", "Request Restock for " + part.getPartName());
+        return "productmanager/restock-form";
+    }
+
+    @PostMapping("/parts/request-restock")
+    public String requestRestock(PartRequest partRequest, @RequestParam("partId") Long partId, Authentication authentication, RedirectAttributes redirectAttributes) {
+        User pm = getLoggedInUser(authentication);
+        com.bytex.customercaresystem.model.Part part = partService.findById(partId).orElseThrow(() -> new IllegalArgumentException("Invalid part Id:" + partId));
+        partRequestService.createPartRequest(pm, part, partRequest.getQuantity(), partRequest.getReason(), null); // No repair associated
+        redirectAttributes.addFlashAttribute("successMessage", "Restock request submitted to Warehouse Manager.");
+        return "redirect:/productmanager/low-stock";
     }
 }
