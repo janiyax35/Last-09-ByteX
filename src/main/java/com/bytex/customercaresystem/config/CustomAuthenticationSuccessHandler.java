@@ -39,17 +39,17 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         for (GrantedAuthority grantedAuthority : authorities) {
             String authorityName = grantedAuthority.getAuthority();
             switch (authorityName) {
-                case "ADMIN":
+                case "ROLE_ADMIN":
                     return "/admin/dashboard";
-                case "STAFF":
+                case "ROLE_STAFF":
                     return "/staff/dashboard";
-                case "TECHNICIAN":
+                case "ROLE_TECHNICIAN":
                     return "/technician/dashboard";
-                case "PRODUCT_MANAGER":
+                case "ROLE_PRODUCT_MANAGER":
                     return "/productmanager/dashboard";
-                case "WAREHOUSE_MANAGER":
+                case "ROLE_WAREHOUSE_MANAGER":
                     return "/warehouse/dashboard";
-                case "CUSTOMER":
+                case "ROLE_CUSTOMER":
                     return "/customer/dashboard";
             }
         }
