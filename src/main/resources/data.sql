@@ -11,6 +11,20 @@
 -- TRUNCATE TABLE order_items;
 -- SET FOREIGN_KEY_CHECKS = 1;
 
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE order_items;
+TRUNCATE TABLE repair_parts;
+TRUNCATE TABLE attachments;
+TRUNCATE TABLE responses;
+TRUNCATE TABLE part_requests;
+TRUNCATE TABLE purchase_orders;
+TRUNCATE TABLE repairs;
+TRUNCATE TABLE tickets;
+TRUNCATE TABLE activity_logs;
+TRUNCATE TABLE suppliers;
+TRUNCATE TABLE users;
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- Note: IDs are auto-generated.
 -- Roles must be uppercase as defined in the Enum: ADMIN, STAFF, TECHNICIAN, PRODUCT_MANAGER, WAREHOUSE_MANAGER, CUSTOMER
 
