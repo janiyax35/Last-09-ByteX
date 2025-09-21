@@ -1,40 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#po-form-content})}">
-
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layouts/dashboard-layout :: head('Create Purchase Order')}"></head>
 <body>
-
-<div id="po-form-content">
-    <div class="container-fluid">
-        <h1 class="h3 mb-2 text-light">Create New Purchase Order</h1>
-        <p class="mb-4">Select a supplier to begin creating a new purchase order.</p>
-
-        <div class="card shadow mb-4">
-            <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Step 1: Select Supplier</h6></div>
-            <div class="card-body">
-                <form th:action="@{/warehouse/orders/new}" th:object="${purchaseOrder}" method="post">
-                    <div class="mb-3">
-                        <label for="supplier" class="form-label">Supplier</label>
-                        <select class="form-select" id="supplier" th:field="*{supplier}" required>
-                            <option value="">-- Select a Supplier --</option>
-                            <option th:each="s : ${suppliers}" th:value="${s.supplierId}" th:text="${s.supplierName}"></option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="expectedDelivery" class="form-label">Expected Delivery Date</label>
-                        <input type="date" class="form-control" id="expectedDelivery" th:field="*{expectedDelivery}">
-                    </div>
-
-                    <!-- Total Amount will be calculated based on items, so it's not here -->
-                    <input type="hidden" th:field="*{totalAmount}" value="0.00" />
-
-                    <button type="submit" class="btn btn-primary">Create and Add Items</button>
-                    <a th:href="@{/warehouse/dashboard}" class="btn btn-secondary">Cancel</a>
-                </form>
+<div class="wrapper">
+    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
+    <div id="content">
+        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
+        <div class="container-fluid">
+            <h1 class="h3 mb-2 text-light">Create New Purchase Order</h1>
+            <p class="mb-4">Select a supplier to begin creating a new purchase order.</p>
+            <div class="card shadow mb-4">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Step 1: Select Supplier</h6></div>
+                <div class="card-body">
+                    <form th:action="@{/warehouse/orders/new}" th:object="${purchaseOrder}" method="post">
+                        <div class="mb-3">
+                            <label for="supplier" class="form-label">Supplier</label>
+                            <select class="form-select" id="supplier" th:field="*{supplier}" required>
+                                <option value="">-- Select a Supplier --</option>
+                                <option th:each="s : ${suppliers}" th:value="${s.supplierId}" th:text="${s.supplierName}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expectedDelivery" class="form-label">Expected Delivery Date</label>
+                            <input type="date" class="form-control" id="expectedDelivery" th:field="*{expectedDelivery}">
+                        </div>
+                        <input type="hidden" th:field="*{totalAmount}" value="0.00" />
+                        <button type="submit" class="btn btn-primary">Create and Add Items</button>
+                        <a th:href="@{/warehouse/dashboard}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
+<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
 </body>
 </html>
