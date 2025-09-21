@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#tech-repair-details-content})}">
+
+<body>
+
+<div id="tech-repair-details-content">
+    <div class="container-fluid">
+        <!-- Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-light" th:text="'Manage Repair Job #' + ${repair.repairId}">Manage Repair</h1>
+            <a th:href="@{/technician/dashboard}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Info -->
+            <div class="col-lg-7">
+                <!-- Repair Details -->
+                <div class="card shadow mb-4">
+                    <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Repair Details</h6></div>
+                    <div class="card-body">
+                        <p><strong>Ticket Subject:</strong> <span th:text="${repair.ticket.subject}"></span></p>
+                        <p><strong>Status:</strong> <span class="badge bg-info" th:text="${#strings.replace(repair.status.name(), '_', ' ')}"></span></p>
+                        <p><strong>Staff's Diagnosis:</strong> <span th:text="${repair.diagnosis}"></span></p>
+                        <p><strong>Technician's Notes:</strong></p>
+                        <pre th:text="${repair.repairDetails} ?: 'No details added yet.'"></pre>
+                    </div>
+                </div>
+                <!-- Conversation -->
+                 <div class="card shadow mb-4">
+                    <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Conversation History</h6></div>
+                    <div class="card-body">
+                        <div th:each="response : ${repair.ticket.responses}" class="mb-3 border-bottom pb-3">
+                             <strong><i class="fas fa-user"></i> <span th:text="${response.user.fullName}"></span></strong>:
+                             <p class="mt-1" th:text="${response.message}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Actions -->
+            <div class="col-lg-5">
+                <!-- Update Status -->
+                <div class="card shadow mb-4">
+                    <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Update Repair Status</h6></div>
+                    <div class="card-body">
+                        <form th:action="@{/technician/repairs/{id}/status(id=${repair.repairId})}" method="post">
+                            <select name="status" class="form-select">
+                                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.name()}" th:selected="${s == repair.status}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-info mt-2">Update Status</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Add Details -->
+                <div class="card shadow mb-4">
+                    <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Add Repair Notes</h6></div>
+                    <div class="card-body">
+                         <form th:action="@{/technician/repairs/{id}/details(id=${repair.repairId})}" method="post">
+                             <textarea name="details" class="form-control" rows="3" placeholder="Add technical notes..."></textarea>
+                             <button type="submit" class="btn btn-primary mt-2">Add Notes</button>
+                         </form>
+                    </div>
+                </div>
+                <!-- Request Part -->
+                <div class="card shadow mb-4">
+                    <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Request Part</h6></div>
+                    <div class="card-body">
+                        <form th:action="@{/technician/repairs/{id}/request-part(id=${repair.repairId})}" method="post">
+                            <div class="mb-2"><label>Part:</label><select name="partId" class="form-select"><option th:each="p : ${parts}" th:value="${p.partId}" th:text="${p.partName}"></option></select></div>
+                            <div class="mb-2"><label>Quantity:</label><input type="number" name="quantity" class="form-control" value="1"></div>
+                            <div class="mb-2"><label>Reason:</label><textarea name="reason" class="form-control" rows="2" placeholder="Reason for request..."></textarea></div>
+                            <button type="submit" class="btn btn-warning">Submit Request</button>
+                        </form>
+                    </div>
+                </div>
+                 <!-- Add Reply -->
+                <div class="card shadow mb-4">
+                     <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Add Reply to Ticket</h6></div>
+                     <div class="card-body">
+                         <form th:action="@{/technician/repairs/{id}/reply(id=${repair.repairId})}" th:object="${newResponse}" method="post">
+                             <textarea class="form-control" rows="4" th:field="*{message}" placeholder="Type your response..."></textarea>
+                             <button type="submit" class="btn btn-primary mt-2">Post Reply</button>
+                         </form>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

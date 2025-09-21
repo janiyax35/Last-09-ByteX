@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#profile-content})}">
+
+<body>
+
+<div id="profile-content">
+    <div class="container-fluid">
+        <h1 class="h3 mb-2 text-light">My Profile</h1>
+        <p class="mb-4">Use this page to update your personal information.</p>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Edit My Details</h6>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/profile}" th:object="${user}" method="post">
+                    <!-- Hidden ID to ensure the correct user is updated -->
+                    <input type="hidden" th:field="*{userId}" />
+
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" th:field="*{username}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                    </div>
+                     <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="phoneNumber" th:field="*{phoneNumber}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Leave blank to keep current password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">My Role</label>
+                        <input type="text" class="form-control" id="role" th:value="${#strings.capitalize(#strings.toLowerCase(user.role.name().replace('_', ' ')))}" readonly>
+                        <!-- Hidden input to ensure role is not lost on submission, though service layer should prevent changes -->
+                        <input type="hidden" th:field="*{role}" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

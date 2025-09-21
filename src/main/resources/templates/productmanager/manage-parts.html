@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/dashboard-layout :: wrapper(pageTitle=${pageTitle}, content=~{::#manage-parts-content})}">
+
+<body>
+
+<div id="manage-parts-content">
+    <div class="container-fluid">
+        <h1 class="h3 mb-2 text-light">Manage Parts Inventory</h1>
+        <p class="mb-4">Add, edit, or discontinue parts from the system inventory.</p>
+
+        <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">All Parts</h6>
+                <a th:href="@{/productmanager/parts/add}" class="btn btn-primary">
+                    <i class="fas fa-plus fa-sm"></i> Add New Part
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Part Name</th>
+                                <th>Part Number</th>
+                                <th>Category</th>
+                                <th>Stock</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="part : ${parts}">
+                                <td th:text="${part.partName}"></td>
+                                <td th:text="${part.partNumber}"></td>
+                                <td th:text="${part.category}"></td>
+                                <td th:text="${part.currentStock}"></td>
+                                <td th:text="${'$' + #numbers.formatDecimal(part.unitPrice, 1, 2)}"></td>
+                                <td><span class="badge" th:classappend="${part.status.name() == 'ACTIVE'} ? 'bg-success' : (${part.status.name() == 'DISCONTINUED'} ? 'bg-secondary' : 'bg-warning')" th:text="${part.status.name()}"></span></td>
+                                <td>
+                                    <a th:href="@{/productmanager/parts/edit/{id}(id=${part.partId})}" class="btn btn-warning btn-sm">Edit</a>
+                                    <a th:href="@{/productmanager/parts/delete/{id}(id=${part.partId})}" class="btn btn-danger btn-sm"
+                                       th:if="${part.status.name() != 'DISCONTINUED'}"
+                                       onclick="return confirm('Are you sure you want to discontinue this part?');">
+                                        Discontinue
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

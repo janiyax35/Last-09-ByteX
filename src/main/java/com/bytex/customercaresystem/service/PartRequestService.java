@@ -1,0 +1,41 @@
+package com.bytex.customercaresystem.service;
+
+import com.bytex.customercaresystem.model.Part;
+import com.bytex.customercaresystem.model.PartRequest;
+import com.bytex.customercaresystem.model.User;
+
+public interface PartRequestService {
+
+    /**
+     * Creates a new request for a part.
+     * @param requestor The user requesting the part (e.g., a Technician).
+     * @param part The part being requested.
+     * @param quantity The quantity requested.
+     * @param reason A reason or justification for the request.
+     * @return The newly created PartRequest object.
+     */
+    PartRequest createPartRequest(User requestor, Part part, int quantity, String reason);
+
+    /**
+     * Finds all part requests that are pending.
+     * @return A list of pending part requests.
+     */
+    java.util.List<PartRequest> findPendingRequests();
+
+    /**
+     * Approves a part request, deducting from stock.
+     * @param requestId The ID of the request to approve.
+     * @return The updated part request.
+     * @throws Exception if stock is insufficient or request not found.
+     */
+    PartRequest approveRequest(Long requestId) throws Exception;
+
+    /**
+     * Rejects a part request.
+     * @param requestId The ID of the request to reject.
+     * @return The updated part request.
+     * @throws Exception if the request is not found.
+     */
+    PartRequest rejectRequest(Long requestId) throws Exception;
+
+}
