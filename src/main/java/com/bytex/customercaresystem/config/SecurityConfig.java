@@ -25,6 +25,7 @@ public class SecurityConfig {
      * For a production environment, use a strong hashing algorithm like BCryptPasswordEncoder.
      */
     @Bean
+    @SuppressWarnings("deprecation")
     public PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();
     }
