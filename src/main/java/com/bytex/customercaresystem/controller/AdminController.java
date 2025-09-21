@@ -27,9 +27,9 @@ public class AdminController {
     @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
         List<User> users = userService.findAllUsers();
-        long customerCount = users.stream().filter(u -> u.getRole().name().equals("CUSTOMER")).count();
-        long staffCount = users.stream().filter(u -> u.getRole().name().equals("STAFF")).count();
-        long techCount = users.stream().filter(u -> u.getRole().name().equals("TECHNICIAN")).count();
+        long customerCount = users.stream().filter(u -> u.getRole() == com.bytex.customercaresystem.model.Role.CUSTOMER).count();
+        long staffCount = users.stream().filter(u -> u.getRole() == com.bytex.customercaresystem.model.Role.STAFF).count();
+        long techCount = users.stream().filter(u -> u.getRole() == com.bytex.customercaresystem.model.Role.TECHNICIAN).count();
 
         model.addAttribute("userCount", users.size());
         model.addAttribute("customerCount", customerCount);

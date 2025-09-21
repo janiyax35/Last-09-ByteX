@@ -27,8 +27,8 @@
                         <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required>
                     </div>
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" th:field="*{username}" required>
+                        <label for="username" class="form-label">Username (cannot be changed)</label>
+                        <input type="text" class="form-control" id="username" th:field="*{username}" readonly>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>

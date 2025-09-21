@@ -92,4 +92,57 @@ public class WarehouseManagerController {
         }
         return "redirect:/warehouse/orders/" + id;
     }
+
+    @GetMapping("/orders/{id}/cancel")
+    public String cancelOrder(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            purchaseOrderService.cancelOrder(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Purchase Order has been canceled.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error canceling order: " + e.getMessage());
+            return "redirect:/warehouse/orders/" + id;
+        }
+        return "redirect:/warehouse/dashboard";
+    }
+
+    // --- Supplier CRUD ---
+
+    @GetMapping("/suppliers")
+    public String manageSuppliers(Model model) {
+        model.addAttribute("suppliers", supplierService.findAll());
+        model.addAttribute("pageTitle", "Manage Suppliers");
+        return "warehouse/manage-suppliers";
+    }
+
+    @GetMapping("/suppliers/add")
+    public String showAddSupplierForm(Model model) {
+        model.addAttribute("supplier", new com.bytex.customercaresystem.model.Supplier());
+        model.addAttribute("pageTitle", "Add New Supplier");
+        return "warehouse/supplier-form";
+    }
+
+    @PostMapping("/suppliers/add")
+    public String saveSupplier(com.bytex.customercaresystem.model.Supplier supplier, RedirectAttributes redirectAttributes) {
+        supplierService.save(supplier);
+        redirectAttributes.addFlashAttribute("successMessage", "Supplier saved successfully!");
+        return "redirect:/warehouse/suppliers";
+    }
+
+    @GetMapping("/suppliers/edit/{id}")
+    public String showEditSupplierForm(@PathVariable Long id, Model model) {
+        model.addAttribute("supplier", supplierService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid supplier Id:" + id)));
+        model.addAttribute("pageTitle", "Edit Supplier");
+        return "warehouse/supplier-form";
+    }
+
+    @GetMapping("/suppliers/delete/{id}")
+    public String deleteSupplier(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            supplierService.deleteById(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Supplier deleted successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: This supplier might be linked to existing purchase orders and cannot be deleted.");
+        }
+        return "redirect:/warehouse/suppliers";
+    }
 }

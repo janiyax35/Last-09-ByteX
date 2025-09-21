@@ -11,4 +11,10 @@ public interface SupplierService {
      */
     List<Supplier> findAll();
 
+    Supplier save(Supplier supplier);
+
+    void deleteById(Long id);
+
+    Optional<Supplier> findById(Long id);
+
 }
