@@ -22,13 +22,16 @@ public class TechnicianController {
     private final com.bytex.customercaresystem.service.PartService partService;
     private final com.bytex.customercaresystem.service.PartRequestService partRequestService;
     private final com.bytex.customercaresystem.service.ResponseService responseService;
+    private final com.bytex.customercaresystem.service.TicketService ticketService;
 
-    public TechnicianController(UserService userService, RepairService repairService, com.bytex.customercaresystem.service.PartService partService, com.bytex.customercaresystem.service.PartRequestService partRequestService, com.bytex.customercaresystem.service.ResponseService responseService) {
+
+    public TechnicianController(UserService userService, RepairService repairService, com.bytex.customercaresystem.service.PartService partService, com.bytex.customercaresystem.service.PartRequestService partRequestService, com.bytex.customercaresystem.service.ResponseService responseService, com.bytex.customercaresystem.service.TicketService ticketService) {
         this.userService = userService;
         this.repairService = repairService;
         this.partService = partService;
         this.partRequestService = partRequestService;
         this.responseService = responseService;
+        this.ticketService = ticketService;
     }
 
     private User getLoggedInUser(Authentication authentication) {
@@ -79,8 +82,15 @@ public class TechnicianController {
         User technician = getLoggedInUser(authentication);
         com.bytex.customercaresystem.model.Repair repair = repairService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid repair Id:" + id));
         com.bytex.customercaresystem.model.Part part = partService.findById(partId).orElseThrow(() -> new IllegalArgumentException("Invalid part Id:" + partId));
+
+        // Create the part request
         partRequestService.createPartRequest(technician, part, quantity, reason, repair);
-        redirectAttributes.addFlashAttribute("successMessage", "Part request submitted successfully.");
+
+        // Update the ticket stage
+        com.bytex.customercaresystem.model.Ticket ticket = repair.getTicket();
+        ticketService.updateTicketStage(ticket.getTicketID(), com.bytex.customercaresystem.model.TicketStage.AWAITING_PARTS);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Part request submitted successfully. Ticket stage updated.");
         return "redirect:/technician/repairs/" + id;
     }
 

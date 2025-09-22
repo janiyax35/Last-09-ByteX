@@ -97,9 +97,9 @@ public class AdminController {
     }
 
     @PostMapping("/users/edit/{id}")
-    public String updateUser(@org.springframework.web.bind.annotation.PathVariable Long id, User user, RedirectAttributes redirectAttributes) {
+    public String updateUser(@org.springframework.web.bind.annotation.PathVariable Long id, User user, RedirectAttributes redirectAttributes, org.springframework.security.core.Authentication authentication) {
         try {
-            userService.updateUser(id, user);
+            userService.updateUser(id, user, authentication);
             redirectAttributes.addFlashAttribute("successMessage", "User updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating user: " + e.getMessage());

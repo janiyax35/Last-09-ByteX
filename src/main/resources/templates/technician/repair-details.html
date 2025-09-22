@@ -19,7 +19,10 @@
                         <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Repair Details</h6></div>
                         <div class="card-body">
                             <p><strong>Ticket Subject:</strong> <span th:text="${repair.ticket.subject}"></span></p>
-                            <p><strong>Status:</strong> <span class="badge bg-info" th:text="${#strings.replace(repair.status.name(), '_', ' ')}"></span></p>
+                            <p th:if="${repair.ticket.stage != null}"><strong>Ticket Stage:</strong>
+                                <span class="badge bg-warning" th:text="${repair.ticket.stage.displayName}"></span>
+                            </p>
+                            <p><strong>Repair Status:</strong> <span class="badge bg-info" th:text="${#strings.replace(repair.status.name(), '_', ' ')}"></span></p>
                             <p><strong>Staff's Diagnosis:</strong> <span th:text="${repair.diagnosis}"></span></p>
                             <p><strong>Technician's Notes:</strong></p>
                             <pre th:text="${repair.repairDetails} ?: 'No details added yet.'"></pre>

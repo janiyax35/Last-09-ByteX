@@ -15,10 +15,14 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final PartRepository partRepository;
+    private final com.bytex.customercaresystem.repository.PartRequestRepository partRequestRepository;
+    private final com.bytex.customercaresystem.repository.TicketRepository ticketRepository;
 
-    public PurchaseOrderServiceImpl(PurchaseOrderRepository purchaseOrderRepository, PartRepository partRepository) {
+    public PurchaseOrderServiceImpl(PurchaseOrderRepository purchaseOrderRepository, PartRepository partRepository, com.bytex.customercaresystem.repository.PartRequestRepository partRequestRepository, com.bytex.customercaresystem.repository.TicketRepository ticketRepository) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.partRepository = partRepository;
+        this.partRequestRepository = partRequestRepository;
+        this.ticketRepository = ticketRepository;
     }
 
     @Override
@@ -89,5 +93,42 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         po.setTotalAmount(po.getTotalAmount().add(itemTotal));
 
         return purchaseOrderRepository.save(po);
+    }
+
+    @Override
+    @Transactional
+    public PurchaseOrder createPoFromRequest(Long partRequestId, PurchaseOrder purchaseOrder, OrderItem orderItem, User creator) throws Exception {
+        // 1. Find the original PartRequest
+        PartRequest partRequest = partRequestRepository.findById(partRequestId)
+                .orElseThrow(() -> new Exception("Part Request not found."));
+
+        // 2. Create and save the new PurchaseOrder
+        purchaseOrder.setCreatedBy(creator);
+        purchaseOrder.setStatus(PurchaseOrderStatus.PENDING);
+
+        // Calculate total amount from the single item
+        java.math.BigDecimal itemTotal = orderItem.getUnitPrice().multiply(new java.math.BigDecimal(orderItem.getQuantity()));
+        purchaseOrder.setTotalAmount(itemTotal);
+
+        PurchaseOrder savedPo = purchaseOrderRepository.save(purchaseOrder);
+
+        // 3. Create and save the OrderItem
+        orderItem.setPurchaseOrder(savedPo);
+        OrderItemId orderItemId = new OrderItemId(savedPo.getOrderId(), orderItem.getPart().getPartId());
+        orderItem.setId(orderItemId);
+        savedPo.getOrderItems().add(orderItem); // Add to the collection
+
+        // 4. Update the PartRequest status
+        partRequest.setStatus(PartRequestStatus.PURCHASE_ORDERED);
+        partRequestRepository.save(partRequest);
+
+        // 5. Update the Ticket stage
+        if (partRequest.getRepair() != null && partRequest.getRepair().getTicket() != null) {
+            Ticket ticket = partRequest.getRepair().getTicket();
+            ticket.setStage(TicketStage.SUPPLIER_ORDERED);
+            ticketRepository.save(ticket);
+        }
+
+        return purchaseOrderRepository.save(savedPo);
     }
 }

@@ -12,10 +12,11 @@ public interface ActivityLogService {
     List<ActivityLog> findAllLogs();
 
     /**
-     * Saves a new activity log.
-     * @param log The ActivityLog object to save.
-     * @return The saved ActivityLog object.
+     * Saves a new activity log with detailed information.
+     * @param user The user performing the action.
+     * @param actionType The type of action (e.g., CREATE, UPDATE, LOGIN).
+     * @param description A human-readable description of the action.
      */
-    ActivityLog saveLog(ActivityLog log);
+    void saveLog(User user, String actionType, String description);
 
 }

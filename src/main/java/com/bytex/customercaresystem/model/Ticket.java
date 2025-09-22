@@ -35,6 +35,10 @@ public class Ticket {
     @Column(nullable = false, length = 10)
     private TicketPriority priority = TicketPriority.MEDIUM;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private TicketStage stage = TicketStage.AWAITING_ACCEPTANCE;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to_id")
     private User assignedTo;
@@ -113,6 +117,14 @@ public class Ticket {
 
     public void setPriority(TicketPriority priority) {
         this.priority = priority;
+    }
+
+    public TicketStage getStage() {
+        return stage;
+    }
+
+    public void setStage(TicketStage stage) {
+        this.stage = stage;
     }
 
     public User getAssignedTo() {

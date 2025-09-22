@@ -36,9 +36,9 @@ public class ProfileController {
                 .orElseThrow(() -> new IllegalStateException("Cannot find logged in user"));
 
         try {
-            // Use the existing updateUser service method
-            userService.updateUser(loggedInUser.getUserId(), user);
-            redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully! Please note that if you changed your username, you will need to log in again for the changes to fully apply.");
+            // Use the new, more secure method for profile updates
+            userService.updateUserProfile(loggedInUser.getUserId(), user);
+            redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating profile: " + e.getMessage());
         }

@@ -13,9 +13,13 @@ import java.util.Optional;
 public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
+    private final RepairService repairService;
+    private final ActivityLogService activityLogService;
 
-    public TicketServiceImpl(TicketRepository ticketRepository) {
+    public TicketServiceImpl(TicketRepository ticketRepository, RepairService repairService, ActivityLogService activityLogService) {
         this.ticketRepository = ticketRepository;
+        this.repairService = repairService;
+        this.activityLogService = activityLogService;
     }
 
     @Override
@@ -42,7 +46,10 @@ public class TicketServiceImpl implements TicketService {
     public Ticket createTicket(Ticket ticket, User customer) {
         ticket.setCustomer(customer);
         ticket.setStatus(TicketStatus.OPEN);
-        return ticketRepository.save(ticket);
+        ticket.setStage(com.bytex.customercaresystem.model.TicketStage.AWAITING_ACCEPTANCE);
+        Ticket savedTicket = ticketRepository.save(ticket);
+        activityLogService.saveLog(customer, "CREATE_TICKET", "Customer created ticket #" + savedTicket.getTicketId());
+        return savedTicket;
     }
 
     @Override
@@ -75,6 +82,7 @@ public class TicketServiceImpl implements TicketService {
     public Ticket acceptTicket(Ticket ticket, User staffMember) {
         ticket.setAssignedTo(staffMember);
         ticket.setStatus(TicketStatus.IN_PROGRESS);
+        ticket.setStage(com.bytex.customercaresystem.model.TicketStage.WITH_STAFF);
         return ticketRepository.save(ticket);
     }
 
@@ -92,5 +100,23 @@ public class TicketServiceImpl implements TicketService {
         ticket.setArchived(true);
         ticket.setArchivedAt(java.time.LocalDateTime.now());
         return ticketRepository.save(ticket);
+    }
+
+    @Override
+    public Ticket escalateTicket(Ticket ticket, User technician, String diagnosis) {
+        // Create the repair record
+        repairService.createRepair(ticket, technician, diagnosis);
+
+        // Update the ticket stage
+        ticket.setStage(com.bytex.customercaresystem.model.TicketStage.WITH_TECHNICIAN);
+        Ticket savedTicket = ticketRepository.save(ticket);
+
+        // For logging, we need to know who escalated it. The service doesn't know.
+        // This should be passed in from the controller. For now, we assume the assigned staff did it.
+        if (ticket.getAssignedTo() != null) {
+            activityLogService.saveLog(ticket.getAssignedTo(), "ESCALATE_TICKET", "Staff escalated ticket #" + savedTicket.getTicketId() + " to technician " + technician.getUsername());
+        }
+
+        return savedTicket;
     }
 }

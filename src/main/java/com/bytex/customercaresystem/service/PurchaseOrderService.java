@@ -19,4 +19,6 @@ public interface PurchaseOrderService {
     void cancelOrder(Long poId) throws Exception;
 
     PurchaseOrder addOrderItem(Long poId, com.bytex.customercaresystem.model.OrderItem orderItem) throws Exception;
+
+    PurchaseOrder createPoFromRequest(Long partRequestId, PurchaseOrder purchaseOrder, com.bytex.customercaresystem.model.OrderItem orderItem, User creator) throws Exception;
 }

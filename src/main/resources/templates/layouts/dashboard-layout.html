@@ -65,7 +65,9 @@
                 <li><a class="dropdown-item" th:href="@{/profile}"><i class="fas fa-user-edit me-2"></i>My Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                    <form th:action="@{/logout}" method="post" id="logoutForm" style="display: none;"></form>
+                    <form th:action="@{/logout}" method="post" id="logoutForm" style="display: none;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    </form>
                     <a class="dropdown-item text-danger" href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
                         <i class="fas fa-sign-out-alt me-2"></i>Logout
                     </a>

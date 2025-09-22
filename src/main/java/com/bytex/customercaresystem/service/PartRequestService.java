@@ -38,4 +38,18 @@ public interface PartRequestService {
      */
     PartRequest rejectRequest(Long requestId) throws Exception;
 
+    /**
+     * Forwards a part request to the warehouse.
+     * @param requestId The ID of the request to forward.
+     * @return The updated part request.
+     * @throws Exception if the request is not found.
+     */
+    PartRequest forwardRequestToWarehouse(Long requestId) throws Exception;
+
+    /**
+     * Finds all part requests that have been forwarded to the warehouse.
+     * @return A list of pending warehouse requests.
+     */
+    java.util.List<PartRequest> findWarehousePendingRequests();
+
 }

@@ -138,4 +138,15 @@ public class ProductManagerController {
         redirectAttributes.addFlashAttribute("successMessage", "Restock request submitted to Warehouse Manager.");
         return "redirect:/productmanager/low-stock";
     }
+
+    @GetMapping("/requests/{id}/forward")
+    public String forwardRequest(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            partRequestService.forwardRequestToWarehouse(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Request forwarded to warehouse.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error forwarding request: " + e.getMessage());
+        }
+        return "redirect:/productmanager/requests";
+    }
 }

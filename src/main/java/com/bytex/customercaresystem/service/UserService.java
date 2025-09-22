@@ -20,7 +20,9 @@ public interface UserService {
 
     Optional<User> findById(Long id);
 
-    User updateUser(Long id, User user) throws Exception;
+    User updateUser(Long id, User user, org.springframework.security.core.Authentication authentication) throws Exception;
 
     List<User> findUsersByRole(com.bytex.customercaresystem.model.Role role);
+
+    User updateUserProfile(Long id, User userWithUpdates) throws Exception;
 }

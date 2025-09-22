@@ -21,6 +21,7 @@
                                     <th>Requested By</th>
                                     <th>Quantity</th>
                                     <th>Reason</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -30,16 +31,17 @@
                                     <td th:text="${req.requestor.fullName}"></td>
                                     <td th:text="${req.quantity}"></td>
                                     <td th:text="${req.reason}"></td>
+                                    <td>
+                                        <a th:href="@{/warehouse/purchase-orders/new/{partRequestId}(partRequestId=${req.id})}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-plus"></i> Create PO
+                                        </a>
+                                    </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(partRequests)}">
-                                    <td colspan="5" class="text-center">No pending stock requests.</td>
+                                    <td colspan="6" class="text-center">No pending stock requests.</td>
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-                     <div class="mt-3">
-                        <p>To fulfill these requests, please proceed to the Purchase Orders page to create a new order.</p>
-                        <a th:href="@{/warehouse/dashboard}" class="btn btn-primary">Go to Purchase Orders</a>
                     </div>
                 </div>
             </div>

@@ -95,10 +95,7 @@ public class StaffController {
         com.bytex.customercaresystem.model.Ticket ticket = ticketService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid ticket Id:" + id));
         User technician = userService.findById(technicianId).orElseThrow(() -> new IllegalArgumentException("Invalid technician Id:" + technicianId));
 
-        repairService.createRepair(ticket, technician, diagnosis);
-
-        // Also update ticket status to show it's with a technician
-        ticketService.updateTicketStatus(ticket, com.bytex.customercaresystem.model.TicketStatus.IN_PROGRESS); // Or a new status like 'ESCALATED'
+        ticketService.escalateTicket(ticket, technician, diagnosis);
 
         redirectAttributes.addFlashAttribute("successMessage", "Ticket successfully escalated to " + technician.getFullName());
         return "redirect:/staff/tickets/" + id;

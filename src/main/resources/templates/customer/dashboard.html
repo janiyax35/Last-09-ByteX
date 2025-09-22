@@ -40,17 +40,8 @@
                                 <tr th:each="ticket : ${tickets}">
                                     <td th:text="${ticket.subject}">My PC is broken</td>
                                     <td>
-                                        <span class="badge"
-                                              th:classappend="${#strings.contains(ticket.status.name(), 'OPEN')} ? 'bg-success' :
-                                                             (${#strings.contains(ticket.status.name(), 'PROGRESS')} ? 'bg-info' :
-                                                         (${#strings.contains(ticket.status.name(), 'PENDING')} ? 'bg-warning' : 'bg-secondary'))">
-                                        <th:block th:switch="${ticket.status.name()}">
-                                            <span th:case="'IN_PROGRESS'">
-                                                <span th:if="${!#lists.isEmpty(ticket.repairs)}">Assigned to Technician</span>
-                                                <span th:if="${#lists.isEmpty(ticket.repairs)}">In Progress with Staff</span>
-                                            </span>
-                                            <span th:case="*" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span>
-                                        </th:block>
+                                    <span class="badge bg-info" th:text="${#strings.replace(ticket.stage.name(), '_', ' ')}">
+                                        STAGE
                                         </span>
                                     </td>
                                     <td th:text="${ticket.priority.name()}">HIGH</td>
