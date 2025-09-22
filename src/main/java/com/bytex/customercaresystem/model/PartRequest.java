@@ -12,7 +12,7 @@ public class PartRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long requestId;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "part_id", nullable = false)
@@ -46,12 +46,12 @@ public class PartRequest {
     }
 
     // Getters and Setters
-    public Long getRequestId() {
-        return requestId;
+    public Long getId() {
+        return id;
     }
 
-    public void setRequestId(Long requestId) {
-        this.requestId = requestId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Part getPart() {
@@ -124,18 +124,18 @@ public class PartRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PartRequest that = (PartRequest) o;
-        return Objects.equals(requestId, that.requestId);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requestId);
+        return Objects.hash(id);
     }
 
     @Override
     public String toString() {
         return "PartRequest{" +
-                "requestId=" + requestId +
+                "id=" + id +
                 ", status=" + status +
                 '}';
     }
