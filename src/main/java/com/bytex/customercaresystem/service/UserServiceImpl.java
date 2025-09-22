@@ -88,21 +88,22 @@ public class UserServiceImpl implements UserService {
         existingUser.setFullName(userWithUpdates.getFullName());
         existingUser.setPhoneNumber(userWithUpdates.getPhoneNumber());
 
-        // Correct logic: Prevent an admin from changing ONLY THEIR OWN role.
+        // Simplified and corrected logic for role updates.
         String loggedInUsername = authentication.getName();
         User loggedInUser = findByUsername(loggedInUsername)
                 .orElseThrow(() -> new IllegalStateException("Currently authenticated user not found in database"));
 
-        // If the user being edited is the same as the logged-in user, and they are an admin, don't change the role.
+        // Check if the admin is trying to edit their own profile.
         if (existingUser.getUserId().equals(loggedInUser.getUserId())) {
-            if (existingUser.getRole() == Role.ADMIN && userWithUpdates.getRole() != Role.ADMIN) {
-                 // an admin is trying to change their own role, do nothing or throw exception
-            } else {
-                 existingUser.setRole(userWithUpdates.getRole());
+            // If the role in the form is different from their current role, it's an error.
+            if (userWithUpdates.getRole() != null && existingUser.getRole() != userWithUpdates.getRole()) {
+                throw new Exception("Admins cannot change their own role.");
             }
         } else {
-            // The logged-in admin is editing another user, so allow role change.
-            existingUser.setRole(userWithUpdates.getRole());
+            // If editing another user, update their role.
+            if (userWithUpdates.getRole() != null) {
+                existingUser.setRole(userWithUpdates.getRole());
+            }
         }
 
         // Only update password if a new one is provided in the form

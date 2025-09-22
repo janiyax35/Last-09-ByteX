@@ -95,4 +95,12 @@ public interface TicketService {
      * @return The updated ticket.
      */
     Ticket escalateTicket(Ticket ticket, User technician, String diagnosis);
+
+    /**
+     * Updates the workflow stage of a ticket.
+     * @param ticketId The ID of the ticket to update.
+     * @param stage The new stage.
+     * @return The updated ticket.
+     */
+    Ticket updateTicketStage(Long ticketId, com.bytex.customercaresystem.model.TicketStage stage);
 }

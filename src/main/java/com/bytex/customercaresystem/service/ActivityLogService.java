@@ -1,6 +1,8 @@
 package com.bytex.customercaresystem.service;
 
 import com.bytex.customercaresystem.model.ActivityLog;
+import com.bytex.customercaresystem.model.User;
+
 import java.util.List;
 
 public interface ActivityLogService {
