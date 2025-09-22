@@ -37,10 +37,13 @@ public class StaffController {
     }
 
     @GetMapping("/dashboard")
-    public String staffDashboard(Model model, Authentication authentication) {
+    public String staffDashboard(Model model, Authentication authentication, @RequestParam(required = false) String keyword) {
         User staffMember = getLoggedInUser(authentication);
+        // The main dashboard search should probably search all tickets, not just unassigned.
+        // For simplicity, we will just search the "My Tickets" list for now.
         model.addAttribute("unassignedTickets", ticketService.findUnassignedTickets());
-        model.addAttribute("myTickets", ticketService.findTicketsByAssignedTo(staffMember));
+        model.addAttribute("myTickets", ticketService.searchTickets(keyword, null, staffMember));
+        model.addAttribute("keyword", keyword);
         model.addAttribute("pageTitle", "Staff Dashboard");
         return "staff/dashboard";
     }
@@ -64,6 +67,7 @@ public class StaffController {
         model.addAttribute("ticket", ticket);
         model.addAttribute("newResponse", new com.bytex.customercaresystem.model.Response());
         model.addAttribute("technicians", userService.findUsersByRole(com.bytex.customercaresystem.model.Role.TECHNICIAN));
+        model.addAttribute("staffMembers", userService.findUsersByRole(com.bytex.customercaresystem.model.Role.STAFF));
         model.addAttribute("statuses", com.bytex.customercaresystem.model.TicketStatus.values());
         model.addAttribute("pageTitle", "Ticket Details");
         return "staff/ticket-details";
@@ -110,9 +114,10 @@ public class StaffController {
     }
 
     @GetMapping("/my-tickets")
-    public String viewMyTickets(Model model, Authentication authentication) {
+    public String viewMyTickets(Model model, Authentication authentication, @RequestParam(required = false) String keyword) {
         User staffMember = getLoggedInUser(authentication);
-        model.addAttribute("myTickets", ticketService.findTicketsByAssignedTo(staffMember));
+        model.addAttribute("myTickets", ticketService.searchTickets(keyword, null, staffMember));
+        model.addAttribute("keyword", keyword);
         model.addAttribute("pageTitle", "My Assigned Tickets");
         return "staff/my-tickets";
     }

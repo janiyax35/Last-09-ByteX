@@ -40,4 +40,21 @@ public class SupplierServiceImpl implements SupplierService {
     public List<Supplier> findByParts(com.bytex.customercaresystem.model.Part part) {
         return supplierRepository.findByParts(part);
     }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public Supplier updateSupplier(Supplier supplierWithUpdates) throws Exception {
+        Supplier existingSupplier = supplierRepository.findById(supplierWithUpdates.getSupplierId())
+                .orElseThrow(() -> new Exception("Supplier not found with id: " + supplierWithUpdates.getSupplierId()));
+
+        existingSupplier.setSupplierName(supplierWithUpdates.getSupplierName());
+        existingSupplier.setContactInfo(supplierWithUpdates.getContactInfo());
+        existingSupplier.setAddress(supplierWithUpdates.getAddress());
+
+        // The 'parts' set from the form will be automatically bound by Spring.
+        // We just need to ensure we set it on the managed entity.
+        existingSupplier.setParts(supplierWithUpdates.getParts());
+
+        return supplierRepository.save(existingSupplier);
+    }
 }

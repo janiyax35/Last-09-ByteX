@@ -34,7 +34,7 @@ public class PartRequestServiceImpl implements PartRequestService {
 
     @Override
     public java.util.List<PartRequest> findPendingRequests() {
-        return partRequestRepository.findByStatus(PartRequestStatus.PENDING);
+        return partRequestRepository.findByStatusWithDetails(PartRequestStatus.PENDING);
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.bytex.customercaresystem.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,11 +21,13 @@ public class AdminController {
     private final UserService userService;
     private final ActivityLogService activityLogService;
     private final com.bytex.customercaresystem.service.TicketService ticketService;
+    private final com.bytex.customercaresystem.service.PurchaseOrderService purchaseOrderService;
 
-    public AdminController(UserService userService, ActivityLogService activityLogService, com.bytex.customercaresystem.service.TicketService ticketService) {
+    public AdminController(UserService userService, ActivityLogService activityLogService, com.bytex.customercaresystem.service.TicketService ticketService, com.bytex.customercaresystem.service.PurchaseOrderService purchaseOrderService) {
         this.userService = userService;
         this.activityLogService = activityLogService;
         this.ticketService = ticketService;
+        this.purchaseOrderService = purchaseOrderService;
     }
 
     private User getLoggedInUser(org.springframework.security.core.Authentication authentication) {
@@ -127,15 +130,29 @@ public class AdminController {
 
     @GetMapping("/tickets")
     public String monitorTickets(Model model, @RequestParam(required = false) String keyword) {
-        List<com.bytex.customercaresystem.model.Ticket> tickets;
-        if (keyword != null && !keyword.isEmpty()) {
-            tickets = ticketService.searchTickets(keyword);
-            model.addAttribute("keyword", keyword);
-        } else {
-            tickets = ticketService.findAllTickets();
-        }
+        List<com.bytex.customercaresystem.model.Ticket> tickets = ticketService.searchTickets(keyword, null, null);
         model.addAttribute("tickets", tickets);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("pageTitle", "All System Tickets");
         return "admin/all-tickets";
+    }
+
+    @PostMapping("/tickets/{id}/assign-staff")
+    public String assignStaffToTicket(@PathVariable Long id, @RequestParam("staffId") Long staffId, RedirectAttributes redirectAttributes) {
+        com.bytex.customercaresystem.model.Ticket ticket = ticketService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ticket Id:" + id));
+        User staffMember = userService.findById(staffId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid staff Id:" + staffId));
+
+        ticketService.acceptTicket(ticket, staffMember);
+        redirectAttributes.addFlashAttribute("successMessage", "Ticket #" + id + " has been assigned to " + staffMember.getFullName());
+        return "redirect:/staff/tickets/" + id;
+    }
+
+    @GetMapping("/parts-orders")
+    public String monitorPartsOrders(Model model) {
+        model.addAttribute("purchaseOrders", purchaseOrderService.findAll());
+        model.addAttribute("pageTitle", "All Parts Orders");
+        return "admin/parts-orders";
     }
 }

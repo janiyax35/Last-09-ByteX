@@ -119,20 +119,32 @@ public class WarehouseManagerController {
     @GetMapping("/suppliers/add")
     public String showAddSupplierForm(Model model) {
         model.addAttribute("supplier", new com.bytex.customercaresystem.model.Supplier());
+        model.addAttribute("allParts", partService.findAll());
         model.addAttribute("pageTitle", "Add New Supplier");
         return "warehouse/supplier-form";
     }
 
     @PostMapping("/suppliers/add")
     public String saveSupplier(com.bytex.customercaresystem.model.Supplier supplier, RedirectAttributes redirectAttributes) {
-        supplierService.save(supplier);
-        redirectAttributes.addFlashAttribute("successMessage", "Supplier saved successfully!");
+        try {
+            if (supplier.getSupplierId() == null) {
+                supplierService.save(supplier);
+                redirectAttributes.addFlashAttribute("successMessage", "Supplier added successfully!");
+            } else {
+                supplierService.updateSupplier(supplier);
+                redirectAttributes.addFlashAttribute("successMessage", "Supplier updated successfully!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error saving supplier: " + e.getMessage());
+            return "redirect:/warehouse/suppliers/add"; // Redirect back to form on error
+        }
         return "redirect:/warehouse/suppliers";
     }
 
     @GetMapping("/suppliers/edit/{id}")
     public String showEditSupplierForm(@PathVariable Long id, Model model) {
         model.addAttribute("supplier", supplierService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid supplier Id:" + id)));
+        model.addAttribute("allParts", partService.findAll());
         model.addAttribute("pageTitle", "Edit Supplier");
         return "warehouse/supplier-form";
     }
