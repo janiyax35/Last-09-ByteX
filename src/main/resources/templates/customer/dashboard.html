@@ -31,6 +31,7 @@
                                 <tr>
                                     <th>Subject</th>
                                     <th>Status</th>
+                                    <th>Stage</th>
                                     <th>Priority</th>
                                     <th>Last Updated</th>
                                     <th>Actions</th>
@@ -40,9 +41,10 @@
                                 <tr th:each="ticket : ${tickets}">
                                     <td th:text="${ticket.subject}">My PC is broken</td>
                                     <td>
-                                    <span class="badge bg-info" th:text="${#strings.replace(ticket.stage.name(), '_', ' ')}">
-                                        STAGE
-                                        </span>
+                                        <span class="badge" th:classappend="${ticket.status.name() == 'OPEN' ? 'bg-success' : (ticket.status.name() == 'IN_PROGRESS' ? 'bg-primary' : 'bg-secondary')}" th:text="${ticket.status.name()}"></span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info" th:if="${ticket.stage != null}" th:text="${ticket.stage.displayName}"></span>
                                     </td>
                                     <td th:text="${ticket.priority.name()}">HIGH</td>
                                     <td th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</td>

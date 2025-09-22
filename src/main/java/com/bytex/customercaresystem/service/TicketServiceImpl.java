@@ -119,4 +119,13 @@ public class TicketServiceImpl implements TicketService {
 
         return savedTicket;
     }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public Ticket updateTicketStage(Long ticketId, com.bytex.customercaresystem.model.TicketStage stage) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ticket Id:" + ticketId));
+        ticket.setStage(stage);
+        return ticketRepository.save(ticket);
+    }
 }

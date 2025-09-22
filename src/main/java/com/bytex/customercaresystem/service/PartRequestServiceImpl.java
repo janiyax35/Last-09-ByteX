@@ -64,7 +64,7 @@ public class PartRequestServiceImpl implements PartRequestService {
         if(repair != null) {
             com.bytex.customercaresystem.model.Ticket ticket = repair.getTicket();
             if (ticket != null) {
-                ticket.setStage(com.bytex.customercaresystem.model.TicketStage.TECHNICIAN_ASSIGNED); // Or a new 'PARTS_DELIVERED' stage
+                ticket.setStage(com.bytex.customercaresystem.model.TicketStage.WITH_TECHNICIAN); // Or a new 'PARTS_DELIVERED' stage
                 ticketRepository.save(ticket);
             }
         }
@@ -105,5 +105,10 @@ public class PartRequestServiceImpl implements PartRequestService {
     @Override
     public java.util.List<PartRequest> findWarehousePendingRequests() {
         return partRequestRepository.findByStatus(PartRequestStatus.PENDING_WAREHOUSE);
+    }
+
+    @Override
+    public java.util.Optional<PartRequest> findById(Long id) {
+        return partRequestRepository.findById(id);
     }
 }

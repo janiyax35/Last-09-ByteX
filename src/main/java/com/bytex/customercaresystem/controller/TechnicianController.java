@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/technician")
+@org.springframework.web.bind.annotation.SessionAttributes("partRequestCart")
 public class TechnicianController {
 
     private final UserService userService;
@@ -24,7 +25,6 @@ public class TechnicianController {
     private final com.bytex.customercaresystem.service.ResponseService responseService;
     private final com.bytex.customercaresystem.service.TicketService ticketService;
 
-
     public TechnicianController(UserService userService, RepairService repairService, com.bytex.customercaresystem.service.PartService partService, com.bytex.customercaresystem.service.PartRequestService partRequestService, com.bytex.customercaresystem.service.ResponseService responseService, com.bytex.customercaresystem.service.TicketService ticketService) {
         this.userService = userService;
         this.repairService = repairService;
@@ -32,6 +32,12 @@ public class TechnicianController {
         this.partRequestService = partRequestService;
         this.responseService = responseService;
         this.ticketService = ticketService;
+    }
+
+    // Initialize the session attribute
+    @org.springframework.web.bind.annotation.ModelAttribute("partRequestCart")
+    public java.util.Map<Long, Integer> partRequestCart() {
+        return new java.util.LinkedHashMap<>();
     }
 
     private User getLoggedInUser(Authentication authentication) {
@@ -49,20 +55,26 @@ public class TechnicianController {
     }
 
     @GetMapping("/repairs/{id}")
-    public String viewRepairDetails(@org.springframework.web.bind.annotation.PathVariable Long id, Model model) {
+    public String viewRepairDetails(@PathVariable Long id, Model model, @org.springframework.web.bind.annotation.ModelAttribute("partRequestCart") java.util.Map<Long, Integer> partRequestCart) {
         com.bytex.customercaresystem.model.Repair repair = repairService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid repair Id:" + id));
+
+        java.util.Map<com.bytex.customercaresystem.model.Part, Integer> populatedCart = new java.util.LinkedHashMap<>();
+        for(java.util.Map.Entry<Long, Integer> entry : partRequestCart.entrySet()){
+            partService.findById(entry.getKey()).ifPresent(part -> populatedCart.put(part, entry.getValue()));
+        }
 
         model.addAttribute("repair", repair);
         model.addAttribute("statuses", com.bytex.customercaresystem.model.RepairStatus.values());
         model.addAttribute("parts", partService.findAll());
         model.addAttribute("newResponse", new com.bytex.customercaresystem.model.Response());
+        model.addAttribute("populatedCart", populatedCart);
         model.addAttribute("pageTitle", "Repair Details");
         return "technician/repair-details";
     }
 
     @PostMapping("/repairs/{id}/status")
-    public String updateRepairStatus(@org.springframework.web.bind.annotation.PathVariable Long id, @org.springframework.web.bind.annotation.RequestParam("status") com.bytex.customercaresystem.model.RepairStatus status, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String updateRepairStatus(@PathVariable Long id, @RequestParam("status") com.bytex.customercaresystem.model.RepairStatus status, RedirectAttributes redirectAttributes) {
         com.bytex.customercaresystem.model.Repair repair = repairService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid repair Id:" + id));
         repairService.updateRepairStatus(repair, status);
         redirectAttributes.addFlashAttribute("successMessage", "Repair status updated successfully.");
@@ -70,32 +82,50 @@ public class TechnicianController {
     }
 
     @PostMapping("/repairs/{id}/details")
-    public String addRepairDetails(@org.springframework.web.bind.annotation.PathVariable Long id, @org.springframework.web.bind.annotation.RequestParam("details") String details, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String addRepairDetails(@PathVariable Long id, @RequestParam("details") String details, RedirectAttributes redirectAttributes) {
         com.bytex.customercaresystem.model.Repair repair = repairService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid repair Id:" + id));
         repairService.addRepairDetails(repair, details);
         redirectAttributes.addFlashAttribute("successMessage", "Repair details added successfully.");
         return "redirect:/technician/repairs/" + id;
     }
 
-    @PostMapping("/repairs/{id}/request-part")
-    public String requestPart(@org.springframework.web.bind.annotation.PathVariable Long id, @org.springframework.web.bind.annotation.RequestParam("partId") Long partId, @org.springframework.web.bind.annotation.RequestParam("quantity") int quantity, @org.springframework.web.bind.annotation.RequestParam("reason") String reason, Authentication authentication, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    @PostMapping("/repairs/{id}/add-to-request")
+    public String addToRequestCart(@PathVariable Long id, @RequestParam("partId") Long partId, @RequestParam("quantity") int quantity, @org.springframework.web.bind.annotation.ModelAttribute("partRequestCart") java.util.Map<Long, Integer> partRequestCart, RedirectAttributes redirectAttributes) {
+        partRequestCart.put(partId, quantity);
+        redirectAttributes.addFlashAttribute("successMessage", "Part added to request list.");
+        return "redirect:/technician/repairs/" + id;
+    }
+
+    @GetMapping("/repairs/{id}/remove-from-request/{partId}")
+    public String removeFromRequestCart(@PathVariable Long id, @PathVariable Long partId, @org.springframework.web.bind.annotation.ModelAttribute("partRequestCart") java.util.Map<Long, Integer> partRequestCart) {
+        partRequestCart.remove(partId);
+        return "redirect:/technician/repairs/" + id;
+    }
+
+    @PostMapping("/repairs/{id}/submit-request")
+    public String submitPartRequest(@PathVariable Long id, @org.springframework.web.bind.annotation.ModelAttribute("partRequestCart") java.util.Map<Long, Integer> partRequestCart, Authentication authentication, RedirectAttributes redirectAttributes, org.springframework.web.bind.support.SessionStatus sessionStatus) {
         User technician = getLoggedInUser(authentication);
         com.bytex.customercaresystem.model.Repair repair = repairService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid repair Id:" + id));
-        com.bytex.customercaresystem.model.Part part = partService.findById(partId).orElseThrow(() -> new IllegalArgumentException("Invalid part Id:" + partId));
 
-        // Create the part request
-        partRequestService.createPartRequest(technician, part, quantity, reason, repair);
+        if (partRequestCart.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot submit an empty request.");
+            return "redirect:/technician/repairs/" + id;
+        }
 
-        // Update the ticket stage
-        com.bytex.customercaresystem.model.Ticket ticket = repair.getTicket();
-        ticketService.updateTicketStage(ticket.getTicketID(), com.bytex.customercaresystem.model.TicketStage.AWAITING_PARTS);
+        for (java.util.Map.Entry<Long, Integer> entry : partRequestCart.entrySet()) {
+            com.bytex.customercaresystem.model.Part part = partService.findById(entry.getKey()).orElseThrow(() -> new IllegalArgumentException("Invalid part Id in cart:" + entry.getKey()));
+            partRequestService.createPartRequest(technician, part, entry.getValue(), "Part required for repair #" + id, repair);
+        }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Part request submitted successfully. Ticket stage updated.");
+        ticketService.updateTicketStage(repair.getTicket().getTicketId(), com.bytex.customercaresystem.model.TicketStage.AWAITING_PARTS);
+
+        sessionStatus.setComplete(); // Clears the session attributes
+        redirectAttributes.addFlashAttribute("successMessage", "Part request submitted successfully.");
         return "redirect:/technician/repairs/" + id;
     }
 
     @PostMapping("/repairs/{id}/reply")
-    public String addReply(@org.springframework.web.bind.annotation.PathVariable Long id, com.bytex.customercaresystem.model.Response newResponse, Authentication authentication, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String addReply(@PathVariable Long id, com.bytex.customercaresystem.model.Response newResponse, Authentication authentication, RedirectAttributes redirectAttributes) {
         User technician = getLoggedInUser(authentication);
         com.bytex.customercaresystem.model.Repair repair = repairService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid repair Id:" + id));
         try {

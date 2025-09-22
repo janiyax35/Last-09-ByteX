@@ -52,4 +52,10 @@ public interface PartRequestService {
      */
     java.util.List<PartRequest> findWarehousePendingRequests();
 
+    /**
+     * Finds a part request by its ID.
+     * @param id The ID of the part request to find.
+     * @return An Optional containing the part request if found.
+     */
+    java.util.Optional<PartRequest> findById(Long id);
 }
