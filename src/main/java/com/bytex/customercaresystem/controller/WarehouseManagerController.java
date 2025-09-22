@@ -165,10 +165,13 @@ public class WarehouseManagerController {
         newOrderItem.setPart(partRequest.getPart());
         newOrderItem.setQuantity(partRequest.getQuantity());
 
+        // Find suppliers that can provide the requested part
+        java.util.List<com.bytex.customercaresystem.model.Supplier> availableSuppliers = supplierService.findByParts(partRequest.getPart());
+
         model.addAttribute("partRequest", partRequest);
         model.addAttribute("purchaseOrder", newPo);
         model.addAttribute("orderItem", newOrderItem);
-        model.addAttribute("suppliers", supplierService.findAll());
+        model.addAttribute("suppliers", availableSuppliers); // Pass the filtered list
         model.addAttribute("pageTitle", "Create PO for Request");
         return "warehouse/create-po-from-request";
     }
@@ -200,5 +203,16 @@ public class WarehouseManagerController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error creating Purchase Order: " + e.getMessage());
             return "redirect:/warehouse/purchase-orders/new/" + partRequestId;
         }
+    }
+
+    @GetMapping("/requests/{id}/fulfill")
+    public String fulfillRequest(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            partRequestService.fulfillRequestFromWarehouse(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Request fulfilled from stock.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error fulfilling request: " + e.getMessage());
+        }
+        return "redirect:/warehouse/stock-requests";
     }
 }

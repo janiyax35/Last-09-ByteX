@@ -32,7 +32,13 @@
                                     <td th:text="${req.quantity}"></td>
                                     <td th:text="${req.reason}"></td>
                                     <td>
-                                        <a th:href="@{/warehouse/purchase-orders/new/{partRequestId}(partRequestId=${req.id})}" class="btn btn-sm btn-primary">
+                                        <!-- Fulfill if stock is available -->
+                                        <a th:if="${req.part.currentStock >= req.quantity}" th:href="@{/warehouse/requests/{id}/fulfill(id=${req.id})}" class="btn btn-sm btn-success"
+                                           onclick="return confirm('This will fulfill the request from existing stock. Are you sure?');">
+                                            <i class="fas fa-check"></i> Fulfill
+                                        </a>
+                                        <!-- Create PO if stock is NOT available -->
+                                        <a th:if="${req.part.currentStock < req.quantity}" th:href="@{/warehouse/purchase-orders/new/{partRequestId}(partRequestId=${req.id})}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-plus"></i> Create PO
                                         </a>
                                     </td>

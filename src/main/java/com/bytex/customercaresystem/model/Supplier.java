@@ -27,6 +27,14 @@ public class Supplier {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+        name = "supplier_parts",
+        joinColumns = @JoinColumn(name = "supplier_id"),
+        inverseJoinColumns = @JoinColumn(name = "part_id")
+    )
+    private java.util.Set<Part> parts = new java.util.HashSet<>();
+
     // Constructors
     public Supplier() {
     }
@@ -70,6 +78,14 @@ public class Supplier {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public java.util.Set<Part> getParts() {
+        return parts;
+    }
+
+    public void setParts(java.util.Set<Part> parts) {
+        this.parts = parts;
     }
 
     // equals, hashCode, toString

@@ -128,4 +128,12 @@ public class TicketServiceImpl implements TicketService {
         ticket.setStage(stage);
         return ticketRepository.save(ticket);
     }
+
+    @Override
+    public List<Ticket> searchTickets(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return findAllTickets();
+        }
+        return ticketRepository.searchByKeyword(keyword);
+    }
 }
