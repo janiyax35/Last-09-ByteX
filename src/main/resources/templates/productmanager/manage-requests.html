@@ -24,7 +24,8 @@
                                     <td th:text="${req.quantity}"></td>
                                     <td th:text="${req.reason}"></td>
                                     <td>
-                                        <a th:href="@{/productmanager/requests/{id}/approve(id=${req.requestId})}" class="btn btn-success btn-sm">Approve</a>
+                                    <a th:if="${req.part.currentStock >= req.quantity}" th:href="@{/productmanager/requests/{id}/approve(id=${req.requestId})}" class="btn btn-success btn-sm">Approve & Fulfill</a>
+                                    <a th:if="${req.part.currentStock < req.quantity}" th:href="@{/productmanager/requests/{id}/forward(id=${req.requestId})}" class="btn btn-warning btn-sm">Forward to Warehouse</a>
                                         <a th:href="@{/productmanager/requests/{id}/reject(id=${req.requestId})}" class="btn btn-danger btn-sm">Reject</a>
                                     </td>
                                 </tr>

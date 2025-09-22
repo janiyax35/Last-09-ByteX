@@ -86,4 +86,13 @@ public interface TicketService {
      * @return The archived ticket.
      */
     Ticket archiveTicket(Ticket ticket);
+
+    /**
+     * Escalates a ticket to a technician.
+     * @param ticket The ticket to escalate.
+     * @param technician The technician to assign.
+     * @param diagnosis The initial diagnosis.
+     * @return The updated ticket.
+     */
+    Ticket escalateTicket(Ticket ticket, User technician, String diagnosis);
 }

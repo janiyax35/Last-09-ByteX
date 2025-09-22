@@ -69,14 +69,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long id, User userWithUpdates) throws Exception {
+    public User updateUser(Long id, User userWithUpdates, org.springframework.security.core.Authentication authentication) throws Exception {
         User existingUser = findById(id).orElseThrow(() -> new Exception("User not found with id: " + id));
 
         // The username from the submitted form is ignored to prevent users from changing their own username.
-        // This is a security measure to prevent session or authority-related issues.
-        // The form input for username is also set to readonly as a UI deterrent.
         if (!existingUser.getUsername().equals(userWithUpdates.getUsername())) {
-            // We do not update the username: existingUser.setUsername(userWithUpdates.getUsername());
+            // We do not update the username.
         }
 
         // Check for email uniqueness if it has changed
@@ -90,8 +88,20 @@ public class UserServiceImpl implements UserService {
         existingUser.setFullName(userWithUpdates.getFullName());
         existingUser.setPhoneNumber(userWithUpdates.getPhoneNumber());
 
-        // Prevent an admin from changing their own role, or any admin's role
-        if (existingUser.getRole() != Role.ADMIN) {
+        // Correct logic: Prevent an admin from changing ONLY THEIR OWN role.
+        String loggedInUsername = authentication.getName();
+        User loggedInUser = findByUsername(loggedInUsername)
+                .orElseThrow(() -> new IllegalStateException("Currently authenticated user not found in database"));
+
+        // If the user being edited is the same as the logged-in user, and they are an admin, don't change the role.
+        if (existingUser.getUserId().equals(loggedInUser.getUserId())) {
+            if (existingUser.getRole() == Role.ADMIN && userWithUpdates.getRole() != Role.ADMIN) {
+                 // an admin is trying to change their own role, do nothing or throw exception
+            } else {
+                 existingUser.setRole(userWithUpdates.getRole());
+            }
+        } else {
+            // The logged-in admin is editing another user, so allow role change.
             existingUser.setRole(userWithUpdates.getRole());
         }
 
@@ -106,5 +116,31 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findUsersByRole(Role role) {
         return userRepository.findByRole(role);
+    }
+
+    @Override
+    public User updateUserProfile(Long id, User userWithUpdates) throws Exception {
+        User existingUser = findById(id).orElseThrow(() -> new Exception("User not found with id: " + id));
+
+        // In the profile context, we do not allow username changes.
+        // We also check if the email is being changed to one that already exists.
+        if (!existingUser.getEmail().equals(userWithUpdates.getEmail())) {
+            if (userRepository.findByEmail(userWithUpdates.getEmail()).isPresent()) {
+                throw new Exception("Error: Email is already in use!");
+            }
+            existingUser.setEmail(userWithUpdates.getEmail());
+        }
+
+        existingUser.setFullName(userWithUpdates.getFullName());
+        existingUser.setPhoneNumber(userWithUpdates.getPhoneNumber());
+
+        // Note: Role is intentionally NOT updated here.
+
+        // Only update password if a new one is provided in the form
+        if (userWithUpdates.getPassword() != null && !userWithUpdates.getPassword().isEmpty()) {
+            existingUser.setPassword(userWithUpdates.getPassword());
+        }
+
+        return userRepository.save(existingUser);
     }
 }

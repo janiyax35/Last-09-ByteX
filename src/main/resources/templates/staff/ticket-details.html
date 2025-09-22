@@ -20,6 +20,9 @@
                         <div class="card-body">
                             <p><strong>Customer:</strong> <span th:text="${ticket.customer.fullName}"></span></p>
                             <p><strong>Status:</strong> <span class="badge bg-info" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span></p>
+                            <p th:if="${ticket.stage != null}"><strong>Stage:</strong>
+                                <span class="badge bg-warning" th:text="${ticket.stage.displayName}"></span>
+                            </p>
                             <p><strong>Priority:</strong> <span th:text="${ticket.priority.name()}"></span></p>
                             <p><strong>Description:</strong> <span th:text="${ticket.description}"></span></p>
                         </div>

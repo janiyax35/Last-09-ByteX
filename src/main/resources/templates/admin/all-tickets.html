@@ -16,7 +16,7 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>ID</th><th>Subject</th><th>Customer</th><th>Assigned To</th><th>Status</th><th>Priority</th><th>Last Updated</th><th>Action</th>
+                                    <th>Assigned To</th><th>Stage</th><th>Priority</th><th>Last Updated</th><th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -25,7 +25,7 @@
                                     <td th:text="${ticket.subject}"></td>
                                     <td th:text="${ticket.customer.fullName}"></td>
                                     <td th:text="${ticket.assignedTo != null} ? ${ticket.assignedTo.fullName} : 'Unassigned'"></td>
-                                    <td><span class="badge bg-info" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span></td>
+                                    <td><span class="badge bg-info" th:text="${#strings.replace(ticket.stage.name(), '_', ' ')}"></span></td>
                                     <td th:text="${ticket.priority.name()}"></td>
                                     <td th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
                                     <td>

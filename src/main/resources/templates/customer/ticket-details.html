@@ -25,18 +25,9 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <p><strong>Status:</strong>
-                        <span class="badge"
-                              th:classappend="${#strings.contains(ticket.status.name(), 'OPEN')} ? 'bg-success' :
-                                         (${#strings.contains(ticket.status.name(), 'PROGRESS')} ? 'bg-info' :
-                                         (${#strings.contains(ticket.status.name(), 'PENDING')} ? 'bg-warning' : 'bg-secondary'))">
-                            <th:block th:switch="${ticket.status.name()}">
-                                <span th:case="'IN_PROGRESS'">
-                                    <span th:if="${!#lists.isEmpty(ticket.repairs)}">Assigned to Technician</span>
-                                    <span th:if="${#lists.isEmpty(ticket.repairs)}">In Progress with Staff</span>
-                                </span>
-                                <span th:case="*" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span>
-                            </th:block>
+                    <p th:if="${ticket.stage != null}"><strong>Stage:</strong>
+                        <span class="badge bg-info" th:text="${ticket.stage.displayName}">
+                            STAGE
                         </span>
                     </p>
                     <p><strong>Priority:</strong> <span th:text="${ticket.priority.name()}"></span></p>

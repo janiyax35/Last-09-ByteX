@@ -150,8 +150,55 @@ public class WarehouseManagerController {
 
     @GetMapping("/stock-requests")
     public String viewStockRequests(Model model) {
-        model.addAttribute("partRequests", partRequestService.findPendingRequests());
+        model.addAttribute("partRequests", partRequestService.findWarehousePendingRequests());
         model.addAttribute("pageTitle", "Stock Replenishment Requests");
         return "warehouse/stock-requests";
+    }
+
+    @GetMapping("/purchase-orders/new/{partRequestId}")
+    public String showNewPoForRequestForm(@PathVariable Long partRequestId, Model model) {
+        com.bytex.customercaresystem.model.PartRequest partRequest = partRequestService.findById(partRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Part Request ID: " + partRequestId));
+
+        PurchaseOrder newPo = new PurchaseOrder();
+        com.bytex.customercaresystem.model.OrderItem newOrderItem = new com.bytex.customercaresystem.model.OrderItem();
+        newOrderItem.setPart(partRequest.getPart());
+        newOrderItem.setQuantity(partRequest.getQuantity());
+
+        model.addAttribute("partRequest", partRequest);
+        model.addAttribute("purchaseOrder", newPo);
+        model.addAttribute("orderItem", newOrderItem);
+        model.addAttribute("suppliers", supplierService.findAll());
+        model.addAttribute("pageTitle", "Create PO for Request");
+        return "warehouse/create-po-from-request";
+    }
+
+    @PostMapping("/purchase-orders/new/{partRequestId}")
+    public String createPoFromRequest(@PathVariable Long partRequestId,
+                                      PurchaseOrder purchaseOrder,
+                                      @RequestParam("partId") Long partId,
+                                      @RequestParam("quantity") int quantity,
+                                      @RequestParam("unitPrice") java.math.BigDecimal unitPrice,
+                                      Authentication authentication,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            User creator = getLoggedInUser(authentication);
+
+            com.bytex.customercaresystem.model.Part part = partService.findById(partId)
+                    .orElseThrow(() -> new Exception("Part not found"));
+
+            com.bytex.customercaresystem.model.OrderItem orderItem = new com.bytex.customercaresystem.model.OrderItem();
+            orderItem.setPart(part);
+            orderItem.setQuantity(quantity);
+            orderItem.setUnitPrice(unitPrice);
+
+            purchaseOrderService.createPoFromRequest(partRequestId, purchaseOrder, orderItem, creator);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Purchase Order created successfully!");
+            return "redirect:/warehouse/dashboard";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error creating Purchase Order: " + e.getMessage());
+            return "redirect:/warehouse/purchase-orders/new/" + partRequestId;
+        }
     }
 }
