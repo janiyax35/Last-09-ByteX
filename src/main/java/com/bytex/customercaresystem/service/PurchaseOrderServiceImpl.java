@@ -37,7 +37,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     @Override
     public List<PurchaseOrder> findAll() {
-        return purchaseOrderRepository.findAll();
+        return purchaseOrderRepository.findAllWithDetails();
     }
 
     @Override
