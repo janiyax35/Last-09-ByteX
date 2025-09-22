@@ -2,29 +2,40 @@ package com.bytex.customercaresystem.repository;
 
 import com.bytex.customercaresystem.model.Ticket;
 import com.bytex.customercaresystem.model.User;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TicketSpecification {
 
-    public static Specification<Ticket> searchByKeyword(String keyword) {
+    public static Specification<Ticket> findByCriteria(String keyword, User customer, User assignedTo) {
         return (root, query, criteriaBuilder) -> {
-            if (keyword == null || keyword.trim().isEmpty()) {
-                return criteriaBuilder.conjunction(); // Returns an always-true predicate
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (customer != null) {
+                predicates.add(criteriaBuilder.equal(root.get("customer"), customer));
             }
 
-            String pattern = "%" + keyword.toLowerCase() + "%";
+            if (assignedTo != null) {
+                predicates.add(criteriaBuilder.equal(root.get("assignedTo"), assignedTo));
+            }
 
-            Join<Ticket, User> customerJoin = root.join("customer");
-            Join<Ticket, User> assignedToJoin = root.join("assignedTo", jakarta.persistence.criteria.JoinType.LEFT);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                Predicate searchPredicate;
+                try {
+                    Long ticketId = Long.parseLong(keyword);
+                    searchPredicate = criteriaBuilder.equal(root.get("ticketId"), ticketId);
+                } catch (NumberFormatException e) {
+                    String pattern = "%" + keyword.toLowerCase() + "%";
+                    searchPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("subject")), pattern);
+                }
+                predicates.add(searchPredicate);
+            }
 
-            Predicate p1 = criteriaBuilder.like(criteriaBuilder.lower(root.get("subject")), pattern);
-            Predicate p2 = criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), pattern);
-            Predicate p3 = criteriaBuilder.like(criteriaBuilder.lower(customerJoin.get("fullName")), pattern);
-            Predicate p4 = criteriaBuilder.like(criteriaBuilder.lower(assignedToJoin.get("fullName")), pattern);
+            query.orderBy(criteriaBuilder.desc(root.get("updatedAt")));
 
-            return criteriaBuilder.or(p1, p2, p3, p4);
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
 }

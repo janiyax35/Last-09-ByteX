@@ -109,5 +109,5 @@ public interface TicketService {
      * @param keyword The keyword to search for.
      * @return A list of matching tickets.
      */
-    List<Ticket> searchTickets(String keyword);
+    List<Ticket> searchTickets(String keyword, User customer, User assignedTo);
 }

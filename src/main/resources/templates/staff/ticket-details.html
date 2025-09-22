@@ -24,6 +24,12 @@
                                 <span class="badge bg-warning" th:text="${ticket.stage.displayName}"></span>
                             </p>
                             <p><strong>Priority:</strong> <span th:text="${ticket.priority.name()}"></span></p>
+                            <div th:if="${!#lists.isEmpty(ticket.repairs)}">
+                                <hr>
+                                <p><strong>Assigned Technician:</strong> <strong th:text="${ticket.repairs[0].technician.fullName}"></strong></p>
+                                <p><strong>Diagnosis:</strong> <span th:text="${ticket.repairs[0].diagnosis}"></span></p>
+                            </div>
+                            <hr>
                             <p><strong>Description:</strong> <span th:text="${ticket.description}"></span></p>
                         </div>
                     </div>
@@ -58,23 +64,53 @@
                             </form>
                         </div>
                     </div>
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Escalate to Technician</h6></div>
+                    <div sec:authorize="hasAuthority('ROLE_ADMIN')">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Re-Assign Staff</h6></div>
+                            <div class="card-body">
+                                <form th:action="@{/admin/tickets/{id}/assign-staff(id=${ticket.ticketId})}" method="post">
+                                     <div class="mb-2">
+                                        <label>Staff Member:</label>
+                                        <select name="staffId" class="form-select">
+                                            <option th:each="staff : ${staffMembers}" th:value="${staff.userId}" th:text="${staff.fullName}" th:selected="${ticket.assignedTo != null && ticket.assignedTo.userId == staff.userId}"></option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Assign Staff</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Assign/Escalate to Technician</h6></div>
+                            <div class="card-body">
+                                <form th:action="@{/staff/tickets/{id}/escalate(id=${ticket.ticketId})}" method="post">
+                                    <div class="mb-2">
+                                        <label>Technician:</label>
+                                        <select name="technicianId" class="form-select">
+                                            <option value="">Select a Technician</option>
+                                            <option th:each="tech : ${technicians}" th:value="${tech.userId}" th:text="${tech.fullName}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>Initial Diagnosis:</label>
+                                        <textarea name="diagnosis" class="form-control" rows="3" placeholder="Describe the technical issue..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning">Assign to Technician</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="card shadow mb-4" th:if="${!#lists.isEmpty(ticket.repairs)}">
+                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Requested Parts Status</h6></div>
                         <div class="card-body">
-                            <form th:action="@{/staff/tickets/{id}/escalate(id=${ticket.ticketId})}" method="post">
-                                <div class="mb-2">
-                                    <label>Technician:</label>
-                                    <select name="technicianId" class="form-select">
-                                        <option value="">Select a Technician</option>
-                                        <option th:each="tech : ${technicians}" th:value="${tech.userId}" th:text="${tech.fullName}"></option>
-                                    </select>
-                                </div>
-                                <div class="mb-2">
-                                    <label>Initial Diagnosis:</label>
-                                    <textarea name="diagnosis" class="form-control" rows="3" placeholder="Describe the technical issue..."></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-warning">Escalate</button>
-                            </form>
+                            <div th:each="repair : ${ticket.repairs}">
+                                <ul class="list-group" th:if="${!#lists.isEmpty(repair.partRequests)}">
+                                    <li th:each="req : ${repair.partRequests}" class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span th:text="${req.part.partName} + ' (Qty: ' + ${req.quantity} + ')'"></span>
+                                        <span class="badge" th:classappend="${req.status.name() == 'PENDING' || req.status.name() == 'PENDING_WAREHOUSE'} ? 'bg-warning' : (${req.status.name() == 'FULFILLED'} ? 'bg-success' : 'bg-danger')" th:text="${#strings.replace(req.status.name(), '_', ' ')}"></span>
+                                    </li>
+                                </ul>
+                                <p th:if="${#lists.isEmpty(repair.partRequests)}" class="text-muted">No parts have been requested for this repair.</p>
+                            </div>
                         </div>
                     </div>
                      <div class="card shadow mb-4">

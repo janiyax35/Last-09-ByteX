@@ -25,6 +25,16 @@
                             <label for="address" class="form-label">Address</label>
                             <textarea class="form-control" rows="3" th:field="*{address}"></textarea>
                         </div>
+                        <div class="mb-3">
+                            <label for="parts" class="form-label">Supplied Parts</label>
+                            <select id="parts" name="parts" class="form-select" multiple="multiple" size="8" th:field="*{parts}">
+                                <option th:each="part : ${allParts}"
+                                        th:value="${part.partId}"
+                                        th:text="${part.partName}">
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">Hold down the Ctrl (windows) / Command (Mac) button to select multiple options.</small>
+                        </div>
                         <button type="submit" class="btn btn-primary">Save Supplier</button>
                         <a th:href="@{/warehouse/suppliers}" class="btn btn-secondary">Cancel</a>
                     </form>

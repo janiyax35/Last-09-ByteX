@@ -130,10 +130,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public List<Ticket> searchTickets(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return findAllTickets();
-        }
-        return ticketRepository.findAll(com.bytex.customercaresystem.repository.TicketSpecification.searchByKeyword(keyword));
+    public List<Ticket> searchTickets(String keyword, User customer, User assignedTo) {
+        return ticketRepository.findAll(com.bytex.customercaresystem.repository.TicketSpecification.findByCriteria(keyword, customer, assignedTo));
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -36,10 +37,11 @@ public class CustomerController {
     }
 
     @GetMapping("/dashboard")
-    public String customerDashboard(Model model, Authentication authentication) {
+    public String customerDashboard(Model model, Authentication authentication, @RequestParam(required = false) String keyword) {
         User customer = getLoggedInUser(authentication);
-        List<Ticket> tickets = ticketService.findTicketsByCustomer(customer);
+        List<Ticket> tickets = ticketService.searchTickets(keyword, customer, null);
         model.addAttribute("tickets", tickets);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("pageTitle", "My Dashboard");
         return "customer/dashboard";
     }
