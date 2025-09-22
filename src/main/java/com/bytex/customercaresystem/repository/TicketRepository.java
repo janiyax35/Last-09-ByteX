@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface TicketRepository extends JpaRepository<Ticket, Long> {
+public interface TicketRepository extends JpaRepository<Ticket, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Ticket> {
 
     /**
      * Finds all tickets associated with a specific customer.
@@ -39,17 +39,4 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      * @return A list of unassigned tickets.
      */
     List<Ticket> findByAssignedToIsNull();
-
-    /**
-     * Searches for tickets where the keyword is contained in the subject, description, customer's full name,
-     * or assigned staff's full name, ignoring case.
-     * @param keyword The keyword for the subject search.
-     * @param keyword2 The keyword for the description search.
-     * @param keyword3 The keyword for the customer name search.
-     * @param keyword4 The keyword for the assigned staff name search.
-     * @return A list of matching tickets.
-     */
-    List<Ticket> findBySubjectContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCustomerFullNameContainingIgnoreCaseOrAssignedToFullNameContainingIgnoreCase(
-        String keyword, String keyword2, String keyword3, String keyword4
-    );
 }

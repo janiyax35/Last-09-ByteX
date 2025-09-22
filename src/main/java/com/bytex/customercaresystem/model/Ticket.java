@@ -63,9 +63,6 @@ public class Ticket {
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Repair> repairs;
 
-    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Attachment> attachments;
-
     // Constructors
     public Ticket() {
     }
@@ -189,14 +186,6 @@ public class Ticket {
 
     public void setRepairs(List<Repair> repairs) {
         this.repairs = repairs;
-    }
-
-    public List<Attachment> getAttachments() {
-        return attachments;
-    }
-
-    public void setAttachments(List<Attachment> attachments) {
-        this.attachments = attachments;
     }
 
     // equals, hashCode, toString
