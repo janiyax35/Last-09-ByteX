@@ -43,9 +43,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query("SELECT t FROM Ticket t " +
            "LEFT JOIN t.customer c " +
            "LEFT JOIN t.assignedTo a " +
-           "WHERE LOWER(t.subject) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(c.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(a.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+           "WHERE LOWER(t.subject) LIKE CONCAT('%', :keyword, '%') OR " +
+           "LOWER(t.description) LIKE CONCAT('%', :keyword, '%') OR " +
+           "LOWER(c.fullName) LIKE CONCAT('%', :keyword, '%') OR " +
+           "LOWER(a.fullName) LIKE CONCAT('%', :keyword, '%')")
     List<Ticket> searchByKeyword(@Param("keyword") String keyword);
 }
