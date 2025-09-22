@@ -134,8 +134,6 @@ public class TicketServiceImpl implements TicketService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return findAllTickets();
         }
-        return ticketRepository.findBySubjectContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCustomerFullNameContainingIgnoreCaseOrAssignedToFullNameContainingIgnoreCase(
-            keyword, keyword, keyword, keyword
-        );
+        return ticketRepository.findAll(com.bytex.customercaresystem.repository.TicketSpecification.searchByKeyword(keyword));
     }
 }

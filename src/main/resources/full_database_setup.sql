@@ -1,7 +1,7 @@
 -- ===================================================================
 -- ByteX Customer Care System - Full Database Setup
 -- Database: final_bytex_customer_care_system
--- This script uses ENUM ORDINAL VALUES (integers) for all enum fields.
+-- This script uses STRING LITERALS for all enum fields.
 -- ===================================================================
 
 -- Drop existing tables in reverse order of dependency
@@ -30,7 +30,7 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `full_name` varchar(100) NOT NULL,
   `phone_number` varchar(20) DEFAULT NULL,
-  `role` tinyint NOT NULL COMMENT '0=CUSTOMER, 1=STAFF, 2=TECHNICIAN, 3=PRODUCT_MANAGER, 4=WAREHOUSE_MANAGER, 5=ADMIN',
+  `role` varchar(255) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `last_login` datetime DEFAULT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE `parts` (
   `minimum_stock` int NOT NULL DEFAULT '5',
   `unit_price` decimal(10,2) NOT NULL,
   `category` varchar(50) NOT NULL,
-  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=ACTIVE, 1=LOW_STOCK, 2=OUT_OF_STOCK, 3=DISCONTINUED',
+  `status` varchar(255) NOT NULL DEFAULT 'ACTIVE',
   PRIMARY KEY (`part_id`),
   UNIQUE KEY `UK_part_number` (`part_number`)
 ) ENGINE=InnoDB;
@@ -81,9 +81,9 @@ CREATE TABLE `tickets` (
   `assigned_to_id` BIGINT DEFAULT NULL,
   `subject` varchar(100) NOT NULL,
   `description` text NOT NULL,
-  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=OPEN, 1=IN_PROGRESS, 2=PENDING, 3=RESOLVED, 4=CLOSED',
-  `priority` tinyint NOT NULL DEFAULT '1' COMMENT '0=LOW, 1=MEDIUM, 2=HIGH, 3=CRITICAL',
-  `stage` tinyint DEFAULT NULL COMMENT '0=AWAITING_ACCEPTANCE, 1=WITH_STAFF, 2=WITH_TECHNICIAN, 3=AWAITING_PARTS, 4=WAREHOUSE_REQUESTED, 5=SUPPLIER_ORDERED, 6=RESOLVED, 7=CLOSED',
+  `status` varchar(255) NOT NULL DEFAULT 'OPEN',
+  `priority` varchar(255) NOT NULL DEFAULT 'MEDIUM',
+  `stage` varchar(255) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `closed_at` datetime DEFAULT NULL,
@@ -117,7 +117,7 @@ CREATE TABLE `repairs` (
   `technician_id` BIGINT NOT NULL,
   `diagnosis` text,
   `repair_details` text,
-  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=PENDING, 1=IN_PROGRESS, 2=WAITING_FOR_PARTS, 3=COMPLETED, 4=FAILED',
+  `status` varchar(255) NOT NULL DEFAULT 'PENDING',
   `start_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `completion_date` datetime DEFAULT NULL,
   PRIMARY KEY (`repair_id`),
@@ -135,7 +135,7 @@ CREATE TABLE `part_requests` (
   `repair_id` BIGINT DEFAULT NULL,
   `quantity` int NOT NULL DEFAULT '1',
   `reason` text,
-  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=PENDING, 1=APPROVED, 2=FULFILLED, 3=REJECTED, 4=PENDING_WAREHOUSE, 5=PURCHASE_ORDERED',
+  `status` varchar(255) NOT NULL DEFAULT 'PENDING',
   `request_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `fulfillment_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -153,7 +153,7 @@ CREATE TABLE `purchase_orders` (
   `created_by_id` BIGINT NOT NULL,
   `supplier_id` BIGINT NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
-  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=PENDING, 1=APPROVED, 2=SHIPPED, 3=DELIVERED, 4=CANCELLED',
+  `status` varchar(255) NOT NULL DEFAULT 'PENDING',
   `order_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expected_delivery` datetime DEFAULT NULL,
   `actual_delivery` datetime DEFAULT NULL,
@@ -177,26 +177,27 @@ CREATE TABLE `order_items` (
   CONSTRAINT `fk_orderitems_part` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`)
 ) ENGINE=InnoDB;
 
+-- ActivityLogs Table is removed as it's not fully implemented in the core logic.
 
 -- ===================================================================
--- Sample Data Insertion (Using ORDINAL values for enums)
+-- Sample Data Insertion (Using STRING values for enums)
 -- ===================================================================
 
--- Users: 0=CUSTOMER, 1=STAFF, 2=TECHNICIAN, 3=PRODUCT_MANAGER, 4=WAREHOUSE_MANAGER, 5=ADMIN
+-- Users
 INSERT INTO `users` (username, password, email, full_name, phone_number, role) VALUES
-('admin', 'root', 'admin@bytex.com', 'System Admin', '+94711234567', 5),
-('staff', 'staff', 'staff@bytex.com', 'John Staff', '+94712345678', 1),
-('tech', 'tech', 'tech@bytex.com', 'Mike Technician', '+94714567890', 2),
-('pm', 'pm', 'pm@bytex.com', 'Patricia Manager', '+94716789012', 3),
-('wm', 'wm', 'wm@bytex.com', 'Walter Manager', '+94717890123', 4),
-('customer', 'customer', 'customer@gmail.com', 'Chris Customer', '+94718901234', 0);
+('admin', 'root', 'admin@bytex.com', 'System Admin', '+94711234567', 'ADMIN'),
+('staff', 'staff', 'staff@bytex.com', 'John Staff', '+94712345678', 'STAFF'),
+('tech', 'tech', 'tech@bytex.com', 'Mike Technician', '+94714567890', 'TECHNICIAN'),
+('pm', 'pm', 'pm@bytex.com', 'Patricia Manager', '+94716789012', 'PRODUCT_MANAGER'),
+('wm', 'wm', 'wm@bytex.com', 'Walter Manager', '+94717890123', 'WAREHOUSE_MANAGER'),
+('customer', 'customer', 'customer@gmail.com', 'Chris Customer', '+94718901234', 'CUSTOMER');
 
--- Parts: 0=ACTIVE, 1=LOW_STOCK, 2=OUT_OF_STOCK, 3=DISCONTINUED
+-- Parts
 INSERT INTO `parts` (part_number, part_name, description, current_stock, minimum_stock, unit_price, category, status) VALUES
-('CPU-001', 'Intel Core i9-13900K', 'High-performance CPU for gaming and productivity.', 10, 5, 589.99, 'CPU', 0),
-('GPU-001', 'NVIDIA RTX 4090', 'Top-tier graphics card for 4K gaming.', 4, 3, 1599.99, 'GPU', 1),
-('RAM-001', 'Corsair Vengeance 32GB DDR5', 'High-speed DDR5 RAM for modern systems.', 25, 10, 129.99, 'RAM', 0),
-('SSD-001', 'Samsung 980 Pro 2TB', 'Blazing fast NVMe SSD for OS and games.', 1, 5, 169.99, 'Storage', 2);
+('CPU-001', 'Intel Core i9-13900K', 'High-performance CPU for gaming and productivity.', 10, 5, 589.99, 'CPU', 'ACTIVE'),
+('GPU-001', 'NVIDIA RTX 4090', 'Top-tier graphics card for 4K gaming.', 4, 3, 1599.99, 'GPU', 'LOW_STOCK'),
+('RAM-001', 'Corsair Vengeance 32GB DDR5', 'High-speed DDR5 RAM for modern systems.', 25, 10, 129.99, 'RAM', 'ACTIVE'),
+('SSD-001', 'Samsung 980 Pro 2TB', 'Blazing fast NVMe SSD for OS and games.', 1, 5, 169.99, 'Storage', 'LOW_STOCK');
 
 -- Suppliers
 INSERT INTO `suppliers` (supplier_name, contact_info) VALUES
@@ -204,15 +205,9 @@ INSERT INTO `suppliers` (supplier_name, contact_info) VALUES
 ('PC Parts Direct', 'contact@pcpartsdirect.net'),
 ('Silicon Valley Distribution', 'orders@svd.com');
 
--- Supplier_Parts (Linking suppliers to the parts they provide)
--- Global Tech Imports (ID 1) supplies CPUs (ID 1) and GPUs (ID 2)
-INSERT INTO `supplier_parts` (supplier_id, part_id) VALUES (1, 1), (1, 2);
--- PC Parts Direct (ID 2) supplies RAM (ID 3) and SSDs (ID 4)
-INSERT INTO `supplier_parts` (supplier_id, part_id) VALUES (2, 3), (2, 4);
--- Silicon Valley Distribution (ID 3) supplies everything
-INSERT INTO `supplier_parts` (supplier_id, part_id) VALUES (3, 1), (3, 2), (3, 3), (3, 4);
+-- Supplier_Parts
+INSERT INTO `supplier_parts` (supplier_id, part_id) VALUES (1, 1), (1, 2), (2, 3), (2, 4), (3, 1), (3, 2), (3, 3), (3, 4);
 
--- A sample ticket from Chris Customer (ID 6)
--- Status: 0=OPEN, Priority: 2=HIGH, Stage: 0=AWAITING_ACCEPTANCE
+-- A sample ticket
 INSERT INTO `tickets` (customer_id, subject, description, status, priority, stage, created_at, updated_at) VALUES
-(6, 'My computer is making a loud noise', 'Ever since I installed the new graphics card, there is a loud whirring noise. It gets worse when I play games.', 0, 2, 0, NOW(), NOW());
+(6, 'My computer is making a loud noise', 'Ever since I installed the new graphics card, there is a loud whirring noise. It gets worse when I play games.', 'OPEN', 'HIGH', 'AWAITING_ACCEPTANCE', NOW(), NOW());
