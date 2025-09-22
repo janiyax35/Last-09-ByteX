@@ -34,7 +34,7 @@ public class PartRequestServiceImpl implements PartRequestService {
 
     @Override
     public java.util.List<PartRequest> findPendingRequests() {
-        return partRequestRepository.findByStatusWithDetails(PartRequestStatus.PENDING);
+        return partRequestRepository.findByStatusWithDetails(com.bytex.customercaresystem.model.PartRequestStatus.PENDING);
     }
 
     @Override
