@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Long> {
 
-    @org.springframework.data.jpa.repository.Query("SELECT po FROM PurchaseOrder po JOIN FETCH po.createdBy JOIN FETCH po.supplier")
-    @Override
-    java.util.List<PurchaseOrder> findAll();
+    @org.springframework.data.jpa.repository.Query("SELECT po FROM PurchaseOrder po LEFT JOIN FETCH po.createdBy LEFT JOIN FETCH po.supplier ORDER BY po.orderDate DESC")
+    java.util.List<PurchaseOrder> findAllWithDetails();
 }
