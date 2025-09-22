@@ -2,7 +2,6 @@ package com.bytex.customercaresystem.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -23,6 +22,10 @@ public class PartRequest {
     @JoinColumn(name = "requestor_id", nullable = false)
     private User requestor;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "repair_id")
+    private Repair repair;
+
     @Column(nullable = false)
     private int quantity = 1;
 
@@ -30,96 +33,35 @@ public class PartRequest {
     private String reason;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private PartRequestStatus status = PartRequestStatus.PENDING;
 
     @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime requestDate;
 
     private LocalDateTime fulfillmentDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "repair_id")
-    private Repair repair;
-
-    // Constructors
-    public PartRequest() {
-    }
-
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Part getPart() { return part; }
+    public void setPart(Part part) { this.part = part; }
+    public User getRequestor() { return requestor; }
+    public void setRequestor(User requestor) { this.requestor = requestor; }
+    public Repair getRepair() { return repair; }
+    public void setRepair(Repair repair) { this.repair = repair; }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public String getReason() { return reason; }
+    public void setReason(String reason) { this.reason = reason; }
+    public PartRequestStatus getStatus() { return status; }
+    public void setStatus(PartRequestStatus status) { this.status = status; }
+    public LocalDateTime getRequestDate() { return requestDate; }
+    public void setRequestDate(LocalDateTime requestDate) { this.requestDate = requestDate; }
+    public LocalDateTime getFulfillmentDate() { return fulfillmentDate; }
+    public void setFulfillmentDate(LocalDateTime fulfillmentDate) { this.fulfillmentDate = fulfillmentDate; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Part getPart() {
-        return part;
-    }
-
-    public void setPart(Part part) {
-        this.part = part;
-    }
-
-    public User getRequestor() {
-        return requestor;
-    }
-
-    public void setRequestor(User requestor) {
-        this.requestor = requestor;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    public PartRequestStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(PartRequestStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getRequestDate() {
-        return requestDate;
-    }
-
-    public void setRequestDate(LocalDateTime requestDate) {
-        this.requestDate = requestDate;
-    }
-
-    public LocalDateTime getFulfillmentDate() {
-        return fulfillmentDate;
-    }
-
-    public void setFulfillmentDate(LocalDateTime fulfillmentDate) {
-        this.fulfillmentDate = fulfillmentDate;
-    }
-
-    public Repair getRepair() {
-        return repair;
-    }
-
-    public void setRepair(Repair repair) {
-        this.repair = repair;
-    }
-
-    // equals, hashCode, toString
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -131,13 +73,5 @@ public class PartRequest {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "PartRequest{" +
-                "id=" + id +
-                ", status=" + status +
-                '}';
     }
 }

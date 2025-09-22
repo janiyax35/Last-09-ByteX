@@ -1,57 +1,41 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head th:replace="~{fragments/header :: head('Login')}"></head>
-
 <body>
-
-<div class="container page-container">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card mt-5" data-aos="fade-up">
+        <div class="col-md-6">
+            <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-cogs"></i> ByteX Login</h2>
+                    <h3>Login to ByteX</h3>
                 </div>
-                <div class="card-body p-4">
-
-                    <!-- Login Error Message -->
-                    <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                        Invalid username/email or password.
+                <div class="card-body">
+                    <div th:if="${param.error}" class="alert alert-danger">
+                        Invalid username or password.
                     </div>
-
-                    <!-- Logout Success Message -->
-                    <div th:if="${param.logout}" class="alert alert-success" role="alert">
-                        You have been logged out successfully.
+                    <div th:if="${param.logout}" class="alert alert-success">
+                        You have been logged out.
                     </div>
-
-                    <!-- Registration Success Message -->
-                    <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}">
-                    </div>
-
+                    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
                     <form th:action="@{/login}" method="post">
                         <div class="mb-3">
                             <label for="username" class="form-label">Username or Email</label>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username or email" required autofocus>
+                            <input type="text" id="username" name="username" class="form-control" required autofocus>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                            <input type="password" id="password" name="password" class="form-control" required>
                         </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Login</button>
-                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
                     </form>
-                    <div class="text-center mt-3">
-                        <p class="mb-0">New Customer? <a th:href="@{/signup}">Create an Account</a></p>
+                    <div class="mt-3 text-center">
+                        <span>Don't have an account? </span><a th:href="@{/signup}">Sign up here</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<footer th:replace="~{fragments/footer :: footer}"></footer>
 <div th:replace="~{fragments/footer :: scripts}"></div>
-
 </body>
 </html>

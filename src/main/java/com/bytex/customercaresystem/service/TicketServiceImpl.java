@@ -1,11 +1,15 @@
 package com.bytex.customercaresystem.service;
 
 import com.bytex.customercaresystem.model.Ticket;
+import com.bytex.customercaresystem.model.TicketStage;
 import com.bytex.customercaresystem.model.TicketStatus;
 import com.bytex.customercaresystem.model.User;
 import com.bytex.customercaresystem.repository.TicketRepository;
+import com.bytex.customercaresystem.repository.TicketSpecification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,16 +47,18 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional
     public Ticket createTicket(Ticket ticket, User customer) {
         ticket.setCustomer(customer);
         ticket.setStatus(TicketStatus.OPEN);
-        ticket.setStage(com.bytex.customercaresystem.model.TicketStage.AWAITING_ACCEPTANCE);
+        ticket.setStage(TicketStage.AWAITING_ACCEPTANCE);
         Ticket savedTicket = ticketRepository.save(ticket);
         activityLogService.saveLog(customer, "CREATE_TICKET", "Customer created ticket #" + savedTicket.getTicketId());
         return savedTicket;
     }
 
     @Override
+    @Transactional
     public void cancelTicket(Long ticketId, User customer) throws Exception {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new Exception("Ticket not found."));
@@ -60,11 +66,9 @@ public class TicketServiceImpl implements TicketService {
         if (!ticket.getCustomer().getUserId().equals(customer.getUserId())) {
             throw new Exception("You are not authorized to cancel this ticket.");
         }
-
         if (ticket.getStatus() != TicketStatus.OPEN) {
             throw new Exception("This ticket cannot be canceled as it is already being processed.");
         }
-
         ticketRepository.delete(ticket);
     }
 
@@ -79,50 +83,43 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional
     public Ticket acceptTicket(Ticket ticket, User staffMember) {
         ticket.setAssignedTo(staffMember);
         ticket.setStatus(TicketStatus.IN_PROGRESS);
-        ticket.setStage(com.bytex.customercaresystem.model.TicketStage.WITH_STAFF);
+        ticket.setStage(TicketStage.WITH_STAFF);
         return ticketRepository.save(ticket);
     }
 
     @Override
+    @Transactional
     public Ticket updateTicketStatus(Ticket ticket, TicketStatus status) {
         ticket.setStatus(status);
         if (status == TicketStatus.RESOLVED || status == TicketStatus.CLOSED) {
-            ticket.setClosedAt(java.time.LocalDateTime.now());
+            ticket.setClosedAt(LocalDateTime.now());
         }
         return ticketRepository.save(ticket);
     }
 
     @Override
+    @Transactional
     public Ticket archiveTicket(Ticket ticket) {
         ticket.setArchived(true);
-        ticket.setArchivedAt(java.time.LocalDateTime.now());
+        ticket.setArchivedAt(LocalDateTime.now());
         return ticketRepository.save(ticket);
     }
 
     @Override
+    @Transactional
     public Ticket escalateTicket(Ticket ticket, User technician, String diagnosis) {
-        // Create the repair record
         repairService.createRepair(ticket, technician, diagnosis);
-
-        // Update the ticket stage
-        ticket.setStage(com.bytex.customercaresystem.model.TicketStage.WITH_TECHNICIAN);
-        Ticket savedTicket = ticketRepository.save(ticket);
-
-        // For logging, we need to know who escalated it. The service doesn't know.
-        // This should be passed in from the controller. For now, we assume the assigned staff did it.
-        if (ticket.getAssignedTo() != null) {
-            activityLogService.saveLog(ticket.getAssignedTo(), "ESCALATE_TICKET", "Staff escalated ticket #" + savedTicket.getTicketId() + " to technician " + technician.getUsername());
-        }
-
-        return savedTicket;
+        ticket.setStage(TicketStage.WITH_TECHNICIAN);
+        return ticketRepository.save(ticket);
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
-    public Ticket updateTicketStage(Long ticketId, com.bytex.customercaresystem.model.TicketStage stage) {
+    @Transactional
+    public Ticket updateTicketStage(Long ticketId, TicketStage stage) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid ticket Id:" + ticketId));
         ticket.setStage(stage);
@@ -131,6 +128,6 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public List<Ticket> searchTickets(String keyword, User customer, User assignedTo) {
-        return ticketRepository.findAll(com.bytex.customercaresystem.repository.TicketSpecification.findByCriteria(keyword, customer, assignedTo));
+        return ticketRepository.findAll(TicketSpecification.findByCriteria(keyword, customer, assignedTo));
     }
 }

@@ -1,15 +1,13 @@
 package com.bytex.customercaresystem.controller;
 
+import com.bytex.customercaresystem.model.Role;
+import com.bytex.customercaresystem.model.Ticket;
 import com.bytex.customercaresystem.model.User;
-import com.bytex.customercaresystem.service.ActivityLogService;
-import com.bytex.customercaresystem.service.UserService;
+import com.bytex.customercaresystem.service.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -19,35 +17,26 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
+    private final TicketService ticketService;
+    private final PurchaseOrderService purchaseOrderService;
     private final ActivityLogService activityLogService;
-    private final com.bytex.customercaresystem.service.TicketService ticketService;
-    private final com.bytex.customercaresystem.service.PurchaseOrderService purchaseOrderService;
 
-    public AdminController(UserService userService, ActivityLogService activityLogService, com.bytex.customercaresystem.service.TicketService ticketService, com.bytex.customercaresystem.service.PurchaseOrderService purchaseOrderService) {
+    public AdminController(UserService userService, TicketService ticketService, PurchaseOrderService purchaseOrderService, ActivityLogService activityLogService) {
         this.userService = userService;
-        this.activityLogService = activityLogService;
         this.ticketService = ticketService;
         this.purchaseOrderService = purchaseOrderService;
+        this.activityLogService = activityLogService;
     }
 
-    private User getLoggedInUser(org.springframework.security.core.Authentication authentication) {
-        String username = authentication.getName();
-        return userService.findByUsername(username)
-                .orElseThrow(() -> new IllegalStateException("Authenticated user not found in database"));
+    private User getLoggedInUser(Authentication authentication) {
+        return userService.findByUsername(authentication.getName())
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
     }
 
     @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
-        List<User> users = userService.findAllUsers();
-        long customerCount = users.stream().filter(u -> u.getRole() == com.bytex.customercaresystem.model.Role.CUSTOMER).count();
-        long staffCount = users.stream().filter(u -> u.getRole() == com.bytex.customercaresystem.model.Role.STAFF).count();
-        long techCount = users.stream().filter(u -> u.getRole() == com.bytex.customercaresystem.model.Role.TECHNICIAN).count();
-
-        model.addAttribute("userCount", users.size());
-        model.addAttribute("customerCount", customerCount);
-        model.addAttribute("staffCount", staffCount);
-        model.addAttribute("techCount", techCount);
-
+        model.addAttribute("userCount", userService.findAllUsers().size());
+        model.addAttribute("ticketCount", ticketService.findAllTickets().size());
         return "admin/dashboard";
     }
 
@@ -60,99 +49,81 @@ public class AdminController {
     @GetMapping("/users/add")
     public String showAddUserForm(Model model) {
         model.addAttribute("user", new User());
-        model.addAttribute("pageTitle", "Add New User");
-        // Admins can create any role
-        model.addAttribute("roles", com.bytex.customercaresystem.model.Role.values());
+        model.addAttribute("roles", Role.values());
         return "admin/user-form";
     }
 
     @PostMapping("/users/add")
     public String saveUser(User user, RedirectAttributes redirectAttributes) {
         try {
-            // A more robust service method might be needed to check for uniqueness beforehand
             userService.saveUser(user);
             redirectAttributes.addFlashAttribute("successMessage", "User created successfully!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error: Could not create user. Username or Email might already exist.");
-            // In case of error, redirect back to the form with the entered data
-            redirectAttributes.addFlashAttribute("user", user);
-            return "redirect:/admin/users/add";
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @GetMapping("/users/edit/{id}")
+    public String showEditUserForm(@PathVariable Long id, Model model) {
+        model.addAttribute("user", userService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid user ID")));
+        model.addAttribute("roles", Role.values());
+        return "admin/user-form";
+    }
+
+    @PostMapping("/users/edit/{id}")
+    public String updateUser(@PathVariable Long id, User user, Authentication authentication, RedirectAttributes redirectAttributes) {
+        User loggedInUser = getLoggedInUser(authentication);
+        if (loggedInUser.getUserId().equals(id) && user.getRole() != Role.ADMIN) {
+            redirectAttributes.addFlashAttribute("errorMessage", "You cannot change your own role.");
+            return "redirect:/admin/users/edit/" + id;
+        }
+        try {
+            userService.updateUser(id, user);
+            redirectAttributes.addFlashAttribute("successMessage", "User updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
         }
         return "redirect:/admin/users";
     }
 
     @GetMapping("/users/delete/{id}")
-    public String deleteUser(@org.springframework.web.bind.annotation.PathVariable Long id, RedirectAttributes redirectAttributes, org.springframework.security.core.Authentication authentication) {
+    public String deleteUser(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes) {
         User loggedInUser = getLoggedInUser(authentication);
         if (loggedInUser.getUserId().equals(id)) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error: You cannot delete your own account.");
+            redirectAttributes.addFlashAttribute("errorMessage", "You cannot delete your own account.");
             return "redirect:/admin/users";
         }
-
         userService.deleteUser(id);
-        redirectAttributes.addFlashAttribute("successMessage", "User deleted successfully!");
+        redirectAttributes.addFlashAttribute("successMessage", "User deleted successfully.");
         return "redirect:/admin/users";
-    }
-
-    @GetMapping("/users/edit/{id}")
-    public String showEditUserForm(@org.springframework.web.bind.annotation.PathVariable Long id, Model model) {
-        User user = userService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
-        model.addAttribute("user", user);
-        model.addAttribute("pageTitle", "Edit User");
-        model.addAttribute("roles", com.bytex.customercaresystem.model.Role.values());
-        return "admin/user-form";
-    }
-
-    @PostMapping("/users/edit/{id}")
-    public String updateUser(@org.springframework.web.bind.annotation.PathVariable Long id, User user, RedirectAttributes redirectAttributes, org.springframework.security.core.Authentication authentication) {
-        try {
-            User loggedInUser = getLoggedInUser(authentication);
-            if (loggedInUser.getUserId().equals(id) && user.getRole() != loggedInUser.getRole()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Error: You cannot change your own role.");
-                return "redirect:/admin/users/edit/" + id;
-            }
-
-            userService.updateUser(id, user);
-            redirectAttributes.addFlashAttribute("successMessage", "User updated successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error updating user: " + e.getMessage());
-            return "redirect:/admin/users/edit/" + id;
-        }
-        return "redirect:/admin/users";
-    }
-
-    @GetMapping("/logs")
-    public String viewActivityLogs(Model model) {
-        model.addAttribute("logs", activityLogService.findAllLogs());
-        return "admin/activity-logs";
     }
 
     @GetMapping("/tickets")
     public String monitorTickets(Model model, @RequestParam(required = false) String keyword) {
-        List<com.bytex.customercaresystem.model.Ticket> tickets = ticketService.searchTickets(keyword, null, null);
-        model.addAttribute("tickets", tickets);
+        model.addAttribute("tickets", ticketService.searchTickets(keyword, null, null));
         model.addAttribute("keyword", keyword);
-        model.addAttribute("pageTitle", "All System Tickets");
         return "admin/all-tickets";
     }
 
     @PostMapping("/tickets/{id}/assign-staff")
-    public String assignStaffToTicket(@PathVariable Long id, @RequestParam("staffId") Long staffId, RedirectAttributes redirectAttributes) {
-        com.bytex.customercaresystem.model.Ticket ticket = ticketService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid ticket Id:" + id));
-        User staffMember = userService.findById(staffId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid staff Id:" + staffId));
-
+    public String assignStaffToTicket(@PathVariable Long id, @RequestParam Long staffId, RedirectAttributes redirectAttributes) {
+        Ticket ticket = ticketService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid ticket ID"));
+        User staffMember = userService.findById(staffId).orElseThrow(() -> new IllegalArgumentException("Invalid staff ID"));
         ticketService.acceptTicket(ticket, staffMember);
-        redirectAttributes.addFlashAttribute("successMessage", "Ticket #" + id + " has been assigned to " + staffMember.getFullName());
+        redirectAttributes.addFlashAttribute("successMessage", "Ticket assigned to " + staffMember.getFullName());
         return "redirect:/staff/tickets/" + id;
     }
 
     @GetMapping("/parts-orders")
     public String monitorPartsOrders(Model model) {
         model.addAttribute("purchaseOrders", purchaseOrderService.findAll());
-        model.addAttribute("pageTitle", "All Parts Orders");
         return "admin/parts-orders";
+    }
+
+    @GetMapping("/logs")
+    public String viewActivityLogs(Model model) {
+        model.addAttribute("logs", activityLogService.findAllLogs());
+        return "admin/activity-logs";
     }
 }

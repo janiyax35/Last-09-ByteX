@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
-<!-- This file contains fragments that are included by other pages. -->
-<!-- It is not meant to be rendered directly. -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
 
 <head th:fragment="head(pageTitle)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle} + ' | ByteX Dashboard'"></title>
-
-    <!-- Shared Head Content from fragments/header -->
-    <th:block th:replace="~{fragments/header :: head(${pageTitle})}"></th:block>
-
-    <!-- Dashboard Specific CSS -->
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.ico}">
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 </head>
 
@@ -24,26 +24,30 @@
         <h3><i class="fas fa-cogs"></i> ByteX System</h3>
     </div>
     <ul class="list-unstyled components">
-        <p sec:authentication="name" class="text-center fw-bold"></p>
+        <p class="text-center fw-bold" sec:authentication="name"></p>
+
         <!-- Admin Links -->
         <li sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
         <li sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/users}"><i class="fas fa-users-cog"></i> Manage Users</a></li>
-        <li sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/logs}"><i class="fas fa-clipboard-list"></i> Activity Logs</a></li>
         <li sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/tickets}"><i class="fas fa-eye"></i> Monitor Tickets</a></li>
         <li sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/parts-orders}"><i class="fas fa-truck-loading"></i> Parts Orders</a></li>
+
         <!-- Customer Links -->
         <li sec:authorize="hasAuthority('ROLE_CUSTOMER')"><a th:href="@{/customer/dashboard}"><i class="fas fa-tachometer-alt"></i> My Dashboard</a></li>
         <li sec:authorize="hasAuthority('ROLE_CUSTOMER')"><a th:href="@{/customer/tickets/new}"><i class="fas fa-plus-circle"></i> Create New Ticket</a></li>
+
         <!-- Staff Links -->
         <li sec:authorize="hasAuthority('ROLE_STAFF')"><a th:href="@{/staff/dashboard}"><i class="fas fa-tachometer-alt"></i> Staff Dashboard</a></li>
         <li sec:authorize="hasAuthority('ROLE_STAFF')"><a th:href="@{/staff/my-tickets}"><i class="fas fa-ticket-alt"></i> My Tickets</a></li>
+
         <!-- Technician Links -->
         <li sec:authorize="hasAuthority('ROLE_TECHNICIAN')"><a th:href="@{/technician/dashboard}"><i class="fas fa-wrench"></i> My Repair Jobs</a></li>
+
         <!-- Product Manager Links -->
         <li sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')"><a th:href="@{/productmanager/dashboard}"><i class="fas fa-box-open"></i> PM Dashboard</a></li>
         <li sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')"><a th:href="@{/productmanager/parts}"><i class="fas fa-boxes"></i> Manage Parts</a></li>
         <li sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')"><a th:href="@{/productmanager/requests}"><i class="fas fa-inbox"></i> Part Requests</a></li>
-        <li sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')"><a th:href="@{/productmanager/low-stock}"><i class="fas fa-exclamation-triangle"></i> Low Stock</a></li>
+
         <!-- Warehouse Manager Links -->
         <li sec:authorize="hasAuthority('ROLE_WAREHOUSE_MANAGER')"><a th:href="@{/warehouse/dashboard}"><i class="fas fa-dolly-flatbed"></i> Purchase Orders</a></li>
         <li sec:authorize="hasAuthority('ROLE_WAREHOUSE_MANAGER')"><a th:href="@{/warehouse/suppliers}"><i class="fas fa-truck"></i> Manage Suppliers</a></li>
@@ -52,13 +56,13 @@
 </nav>
 
 <!-- Topbar Fragment -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light" th:fragment="topbar">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" th:fragment="topbar">
     <div class="container-fluid">
         <button type="button" id="sidebarCollapse" class="btn btn-info">
             <i class="fas fa-align-left"></i>
         </button>
         <div class="ms-auto nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fas fa-user-circle me-1"></i>
                 <span sec:authentication="name">User</span>
             </a>
@@ -66,9 +70,7 @@
                 <li><a class="dropdown-item" th:href="@{/profile}"><i class="fas fa-user-edit me-2"></i>My Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                    <form th:action="@{/logout}" method="post" id="logoutForm" style="display: none;">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    </form>
+                    <form th:action="@{/logout}" method="post" id="logoutForm" class="d-none"></form>
                     <a class="dropdown-item text-danger" href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
                         <i class="fas fa-sign-out-alt me-2"></i>Logout
                     </a>
@@ -80,16 +82,13 @@
 
 <!-- Scripts Fragment -->
 <div th:fragment="scripts">
-    <!-- Shared Scripts from fragments/footer -->
-    <div th:replace="~{fragments/footer :: scripts}"></div>
-    <!-- Custom script for sidebar toggle -->
-    <script type="text/javascript">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
         document.addEventListener("DOMContentLoaded", function() {
             var sidebarCollapse = document.getElementById('sidebarCollapse');
             if (sidebarCollapse) {
                 sidebarCollapse.addEventListener('click', function () {
                     document.getElementById('sidebar').classList.toggle('active');
-                    document.getElementById('content').classList.toggle('active');
                 });
             }
         });

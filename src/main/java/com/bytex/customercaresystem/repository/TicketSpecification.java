@@ -22,15 +22,13 @@ public class TicketSpecification {
             }
 
             if (keyword != null && !keyword.trim().isEmpty()) {
-                Predicate searchPredicate;
                 try {
                     Long ticketId = Long.parseLong(keyword);
-                    searchPredicate = criteriaBuilder.equal(root.get("ticketId"), ticketId);
+                    predicates.add(criteriaBuilder.equal(root.get("ticketId"), ticketId));
                 } catch (NumberFormatException e) {
                     String pattern = "%" + keyword.toLowerCase() + "%";
-                    searchPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("subject")), pattern);
+                    predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("subject")), pattern));
                 }
-                predicates.add(searchPredicate);
             }
 
             query.orderBy(criteriaBuilder.desc(root.get("updatedAt")));

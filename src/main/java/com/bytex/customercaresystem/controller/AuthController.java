@@ -4,9 +4,7 @@ import com.bytex.customercaresystem.model.User;
 import com.bytex.customercaresystem.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -31,7 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public String processRegistration(@ModelAttribute("user") User user, BindingResult result, RedirectAttributes redirectAttributes) {
+    public String processRegistration(User user, RedirectAttributes redirectAttributes) {
         try {
             userService.registerNewCustomer(user);
             redirectAttributes.addFlashAttribute("successMessage", "Registration successful! Please log in.");
@@ -44,8 +42,6 @@ public class AuthController {
 
     @GetMapping("/")
     public String viewHomePage() {
-        // This will be handled by the success handler, but it's good to have a default mapping.
-        // It could redirect to login or a generic landing page.
         return "redirect:/login";
     }
 }

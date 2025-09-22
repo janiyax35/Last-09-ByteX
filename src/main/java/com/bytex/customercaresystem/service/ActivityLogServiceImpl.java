@@ -18,21 +18,16 @@ public class ActivityLogServiceImpl implements ActivityLogService {
     }
 
     @Override
-    public List<ActivityLog> findAllLogs() {
-        // Return logs sorted by creation date, newest first.
-        return activityLogRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
-    }
-
-    @Override
     public void saveLog(User user, String actionType, String description) {
         ActivityLog log = new ActivityLog();
         log.setUser(user);
         log.setActionType(actionType);
         log.setDescription(description);
-        // In a real app, we would get the IP address from the request context
-        log.setIpAddress("127.0.0.1");
-        // For simplicity, we are not setting entityType/entityId, but this could be expanded.
-        log.setEntityType("GENERAL");
         activityLogRepository.save(log);
+    }
+
+    @Override
+    public List<ActivityLog> findAllLogs() {
+        return activityLogRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 }

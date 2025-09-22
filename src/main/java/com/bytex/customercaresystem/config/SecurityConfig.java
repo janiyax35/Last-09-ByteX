@@ -1,5 +1,6 @@
 package com.bytex.customercaresystem.config;
 
+import com.bytex.customercaresystem.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,20 +14,18 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
-    public SecurityConfig(AuthenticationSuccessHandler customAuthenticationSuccessHandler) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService, AuthenticationSuccessHandler customAuthenticationSuccessHandler) {
+        this.userDetailsService = userDetailsService;
         this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
     }
 
-    /**
-     * WARNING: This PasswordEncoder is for development purposes only and is NOT SECURE.
-     * It stores passwords in plain text as requested.
-     * For a production environment, use a strong hashing algorithm like BCryptPasswordEncoder.
-     */
     @Bean
     @SuppressWarnings("deprecation")
     public PasswordEncoder passwordEncoder() {
+        // As requested, using plain text for passwords. NOT for production.
         return NoOpPasswordEncoder.getInstance();
     }
 
@@ -34,16 +33,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                // Publicly accessible URLs
-                .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/images/**", "/webfonts/**", "/favicon.ico").permitAll()
+                // Public URLs
+                .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/images/**").permitAll()
                 // Role-based authorization
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/staff/**").hasAnyAuthority("ROLE_STAFF", "ROLE_ADMIN")
                 .requestMatchers("/technician/**").hasAnyAuthority("ROLE_TECHNICIAN", "ROLE_ADMIN")
-                .requestMatchers("/productmanager/**").hasAuthority("ROLE_PRODUCT_MANAGER")
-                .requestMatchers("/warehouse/**").hasAuthority("ROLE_WAREHOUSE_MANAGER")
+                .requestMatchers("/productmanager/**").hasAnyAuthority("ROLE_PRODUCT_MANAGER", "ROLE_ADMIN")
+                .requestMatchers("/warehouse/**").hasAnyAuthority("ROLE_WAREHOUSE_MANAGER", "ROLE_ADMIN")
                 .requestMatchers("/customer/**").hasAuthority("ROLE_CUSTOMER")
-                // All other requests must be authenticated
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -55,7 +53,8 @@ public class SecurityConfig {
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
-            );
+            )
+            .userDetailsService(userDetailsService);
 
         return http.build();
     }

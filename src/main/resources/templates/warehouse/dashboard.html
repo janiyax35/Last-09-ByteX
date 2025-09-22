@@ -1,38 +1,39 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{layouts/dashboard-layout :: head('Warehouse Dashboard')}"></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layouts/dashboard-layout :: head('WM Dashboard')}"></head>
 <body>
 <div class="wrapper">
     <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-light">Purchase Orders</h1>
-                <a th:href="@{/warehouse/orders/new}" class="btn btn-primary shadow-sm"><i class="fas fa-plus-circle fa-sm"></i> Create New Purchase Order</a>
-            </div>
-            <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+            <h1 class="h3 mb-2 text-dark">Purchase Orders</h1>
             <div class="card shadow mb-4">
-                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">All Purchase Orders</h6></div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Order ID</th><th>Supplier</th><th>Total Amount</th><th>Status</th><th>Order Date</th><th>Action</th>
+                                    <th>Order ID</th>
+                                    <th>Supplier</th>
+                                    <th>Status</th>
+                                    <th>Order Date</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:each="po : ${purchaseOrders}">
                                     <td th:text="${po.orderId}"></td>
                                     <td th:text="${po.supplier.supplierName}"></td>
-                                    <td th:text="${'$' + #numbers.formatDecimal(po.totalAmount, 1, 2)}"></td>
-                                    <td><span class="badge" th:classappend="${po.status.name() == 'DELIVERED'} ? 'bg-success' : 'bg-warning'" th:text="${po.status.name()}"></span></td>
+                                    <td><span class="badge" th:classappend="${po.status.name() == 'DELIVERED'} ? 'bg-success' : 'bg-warning'" th:text="${po.status}"></span></td>
                                     <td th:text="${#temporals.format(po.orderDate, 'yyyy-MM-dd')}"></td>
-                                    <td><a th:href="@{/warehouse/orders/{id}(id=${po.orderId})}" class="btn btn-info btn-sm">View Details</a></td>
+                                    <td>
+                                        <a th:href="@{/warehouse/orders/{id}(id=${po.orderId})}" class="btn btn-info btn-sm">View Details</a>
+                                    </td>
                                 </tr>
-                                <tr th:if="${#lists.isEmpty(purchaseOrders)}"><td colspan="6" class="text-center">No purchase orders found.</td></tr>
+                                <tr th:if="${#lists.isEmpty(purchaseOrders)}">
+                                    <td colspan="5" class="text-center">No purchase orders found.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

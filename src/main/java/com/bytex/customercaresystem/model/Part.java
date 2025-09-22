@@ -2,6 +2,7 @@ package com.bytex.customercaresystem.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,109 +36,34 @@ public class Part {
     private String category;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private PartStatus status = PartStatus.ACTIVE;
 
-    @OneToMany(mappedBy = "part")
-    private Set<RepairPart> repairParts;
-
     @ManyToMany(mappedBy = "parts")
-    private Set<Supplier> suppliers;
-
-    // Constructors
-    public Part() {
-    }
+    private Set<Supplier> suppliers = new HashSet<>();
 
     // Getters and Setters
-    public Long getPartId() {
-        return partId;
-    }
+    public Long getPartId() { return partId; }
+    public void setPartId(Long partId) { this.partId = partId; }
+    public String getPartNumber() { return partNumber; }
+    public void setPartNumber(String partNumber) { this.partNumber = partNumber; }
+    public String getPartName() { return partName; }
+    public void setPartName(String partName) { this.partName = partName; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public int getCurrentStock() { return currentStock; }
+    public void setCurrentStock(int currentStock) { this.currentStock = currentStock; }
+    public int getMinimumStock() { return minimumStock; }
+    public void setMinimumStock(int minimumStock) { this.minimumStock = minimumStock; }
+    public BigDecimal getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+    public PartStatus getStatus() { return status; }
+    public void setStatus(PartStatus status) { this.status = status; }
+    public Set<Supplier> getSuppliers() { return suppliers; }
+    public void setSuppliers(Set<Supplier> suppliers) { this.suppliers = suppliers; }
 
-    public void setPartId(Long partId) {
-        this.partId = partId;
-    }
-
-    public String getPartNumber() {
-        return partNumber;
-    }
-
-    public void setPartNumber(String partNumber) {
-        this.partNumber = partNumber;
-    }
-
-    public String getPartName() {
-        return partName;
-    }
-
-    public void setPartName(String partName) {
-        this.partName = partName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getCurrentStock() {
-        return currentStock;
-    }
-
-    public void setCurrentStock(int currentStock) {
-        this.currentStock = currentStock;
-    }
-
-    public int getMinimumStock() {
-        return minimumStock;
-    }
-
-    public void setMinimumStock(int minimumStock) {
-        this.minimumStock = minimumStock;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(BigDecimal unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public PartStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(PartStatus status) {
-        this.status = status;
-    }
-
-    public Set<RepairPart> getRepairParts() {
-        return repairParts;
-    }
-
-    public void setRepairParts(Set<RepairPart> repairParts) {
-        this.repairParts = repairParts;
-    }
-
-    public Set<Supplier> getSuppliers() {
-        return suppliers;
-    }
-
-    public void setSuppliers(Set<Supplier> suppliers) {
-        this.suppliers = suppliers;
-    }
-
-    // equals, hashCode, toString
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -149,14 +75,5 @@ public class Part {
     @Override
     public int hashCode() {
         return Objects.hash(partId);
-    }
-
-    @Override
-    public String toString() {
-        return "Part{" +
-                "partId=" + partId +
-                ", partNumber='" + partNumber + '\'' +
-                ", partName='" + partName + '\'' +
-                '}';
     }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layouts/dashboard-layout :: head('Manage Suppliers')}"></head>
 <body>
 <div class="wrapper">
@@ -7,34 +7,27 @@
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <h1 class="h3 mb-2 text-light">Manage Suppliers</h1>
-            <p class="mb-4">Add, edit, or remove suppliers from the system.</p>
-            <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-dark">Manage Suppliers</h1>
+                <a th:href="@{/warehouse/suppliers/add}" class="btn btn-primary shadow-sm"><i class="fas fa-plus"></i> Add New Supplier</a>
+            </div>
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">All Suppliers</h6>
-                    <a th:href="@{/warehouse/suppliers/add}" class="btn btn-primary"><i class="fas fa-plus fa-sm"></i> Add New Supplier</a>
-                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Supplier Name</th><th>Contact Info</th><th>Address</th><th>Actions</th>
+                                    <th>Name</th>
+                                    <th>Contact Info</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="supplier : ${suppliers}">
-                                    <td th:text="${supplier.supplierName}"></td>
-                                    <td th:text="${supplier.contactInfo}"></td>
-                                    <td th:text="${supplier.address}"></td>
+                                <tr th:each="s : ${suppliers}">
+                                    <td th:text="${s.supplierName}"></td>
+                                    <td th:text="${s.contactInfo}"></td>
                                     <td>
-                                        <a th:href="@{/warehouse/suppliers/edit/{id}(id=${supplier.supplierId})}" class="btn btn-warning btn-sm">Edit</a>
-                                        <a th:href="@{/warehouse/suppliers/delete/{id}(id=${supplier.supplierId})}" class="btn btn-danger btn-sm"
-                                           onclick="return confirm('Are you sure you want to delete this supplier?');">
-                                            Delete
-                                        </a>
+                                        <a th:href="@{/warehouse/suppliers/edit/{id}(id=${s.supplierId})}" class="btn btn-warning btn-sm">Edit</a>
                                     </td>
                                 </tr>
                             </tbody>

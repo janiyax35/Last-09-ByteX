@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layouts/dashboard-layout :: head('Repair Details')}"></head>
 <body>
 <div class="wrapper">
@@ -7,41 +7,34 @@
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-light" th:text="'Manage Repair Job #' + ${repair.repairId}">Manage Repair</h1>
-                <a th:href="@{/technician/dashboard}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                <h1 class="h3 mb-0 text-dark" th:text="'Manage Repair Job #' + ${repair.repairId}"></h1>
+                <a th:href="@{/technician/dashboard}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
             </div>
+
             <div class="row">
                 <div class="col-lg-7">
-                    <!-- Repair Details Card -->
                     <div class="card shadow mb-4">
                         <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Repair Details</h6></div>
                         <div class="card-body">
                             <p><strong>Ticket Subject:</strong> <span th:text="${repair.ticket.subject}"></span></p>
-                            <p th:if="${repair.ticket.stage != null}"><strong>Ticket Stage:</strong>
-                                <span class="badge bg-warning" th:text="${repair.ticket.stage.displayName}"></span>
-                            </p>
-                            <p><strong>Repair Status:</strong> <span class="badge bg-info" th:text="${#strings.replace(repair.status.name(), '_', ' ')}"></span></p>
+                            <p><strong>Ticket Stage:</strong> <span class="badge bg-info" th:text="${repair.ticket.stage?.displayName}"></span></p>
+                            <p><strong>Repair Status:</strong> <span class="badge bg-warning" th:text="${repair.status}"></span></p>
                             <p><strong>Staff's Diagnosis:</strong> <span th:text="${repair.diagnosis}"></span></p>
+                            <hr>
                             <p><strong>Technician's Notes:</strong></p>
                             <pre th:text="${repair.repairDetails} ?: 'No details added yet.'"></pre>
                         </div>
                     </div>
 
-                    <!-- New Part Request Cart -->
                     <div class="card shadow mb-4">
                         <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">New Part Request</h6></div>
                         <div class="card-body">
                             <table class="table table-sm" th:if="${!populatedCart.isEmpty()}">
-                                <thead>
-                                <tr>
-                                    <th>Part Name</th>
-                                    <th>Quantity</th>
-                                    <th>Action</th>
-                                </tr>
-                                </thead>
+                                <thead><tr><th>Part</th><th>Qty</th><th>Action</th></tr></thead>
                                 <tbody>
                                 <tr th:each="item : ${populatedCart}">
                                     <td th:text="${item.key.partName}"></td>
@@ -50,81 +43,49 @@
                                 </tr>
                                 </tbody>
                             </table>
-                            <p th:if="${populatedCart.isEmpty()}" class="text-muted">Your request list is empty. Add parts below.</p>
-                            <hr>
-                            <!-- Submit Final Request Form -->
-                            <form th:action="@{/technician/repairs/{id}/submit-request(id=${repair.repairId})}" method="post" class="mt-2" th:if="${!populatedCart.isEmpty()}">
+                            <p th:if="${populatedCart.isEmpty()}" class="text-muted">Request list is empty.</p>
+                            <form th:if="${!populatedCart.isEmpty()}" th:action="@{/technician/repairs/{id}/submit-request(id=${repair.repairId})}" method="post" class="mt-2">
                                 <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Submit Final Request</button>
                             </form>
-                        </div>
-                    </div>
-
-                    <!-- Add Part to Request Form -->
-                    <div class="card shadow mb-4">
-                        <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Add Part to Request</h6></div>
-                        <div class="card-body">
+                            <hr>
                             <form th:action="@{/technician/repairs/{id}/add-to-request(id=${repair.repairId})}" method="post">
-                                <div class="mb-2"><label>Part:</label>
-                                    <select name="partId" class="form-select">
-                                        <option th:each="p : ${parts}" th:value="${p.partId}" th:text="${p.partName}"></option>
-                                    </select>
+                                <div class="row">
+                                    <div class="col-md-8"><select name="partId" class="form-select"><option th:each="p : ${parts}" th:value="${p.partId}" th:text="${p.partName}"></option></select></div>
+                                    <div class="col-md-4"><input type="number" name="quantity" class="form-control" value="1" min="1"></div>
                                 </div>
-                                <div class="mb-2"><label>Quantity:</label>
-                                    <input type="number" name="quantity" class="form-control" value="1" min="1">
-                                </div>
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add to List</button>
+                                <button type="submit" class="btn btn-primary mt-2"><i class="fas fa-plus"></i> Add to List</button>
                             </form>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-5">
-                    <!-- Update Status and Notes -->
                     <div class="card shadow mb-4">
                         <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Update Progress</h6></div>
                         <div class="card-body">
-                            <form th:action="@{/technician/repairs/{id}/status(id=${repair.repairId})}" method="post">
-                                <label>Update Status:</label>
-                                <select name="status" class="form-select mb-2">
-                                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.name()}" th:selected="${s == repair.status}"></option>
-                                </select>
-                                <button type="submit" class="btn btn-info">Update Status</button>
+                            <form th:action="@{/technician/repairs/{id}/status(id=${repair.repairId})}" method="post" class="mb-3">
+                                <label>Update Repair Status:</label>
+                                <select name="status" class="form-select"><option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == repair.status}"></option></select>
+                                <button type="submit" class="btn btn-info mt-2">Update Status</button>
                             </form>
                             <hr>
-                            <form th:action="@{/technician/repairs/{id}/details(id=${repair.repairId})}" method="post">
-                                <label>Add Notes:</label>
-                                 <textarea name="details" class="form-control mb-2" rows="3" placeholder="Add technical notes..."></textarea>
-                                 <button type="submit" class="btn btn-primary">Add Notes</button>
+                             <form th:action="@{/technician/repairs/{id}/details(id=${repair.repairId})}" method="post">
+                                <label>Add/Update Notes:</label>
+                                <textarea name="details" class="form-control" rows="4" placeholder="Add technical notes..."></textarea>
+                                <button type="submit" class="btn btn-primary mt-2">Save Notes</button>
                              </form>
                         </div>
                     </div>
-
-                    <!-- Existing Part Requests -->
                     <div class="card shadow mb-4">
                         <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Submitted Part Requests</h6></div>
                         <div class="card-body">
                             <ul class="list-group" th:if="${!#lists.isEmpty(repair.partRequests)}">
-                                <li th:each="req : ${repair.partRequests}" class="list-group-item d-flex justify-content-between align-items-center">
+                                <li th:each="req : ${repair.partRequests}" class="list-group-item d-flex justify-content-between">
                                     <span th:text="${req.part.partName} + ' (Qty: ' + ${req.quantity} + ')'"></span>
-                                    <span class="badge" th:classappend="${req.status.name() == 'PENDING' || req.status.name() == 'PENDING_WAREHOUSE'} ? 'bg-warning' : (${req.status.name() == 'FULFILLED'} ? 'bg-success' : 'bg-danger')" th:text="${#strings.replace(req.status.name(), '_', ' ')}"></span>
+                                    <span class="badge bg-warning" th:text="${req.status}"></span>
                                 </li>
                             </ul>
-                            <p th:if="${#lists.isEmpty(repair.partRequests)}" class="text-muted">No parts have been requested for this repair yet.</p>
+                            <p th:if="${#lists.isEmpty(repair.partRequests)}" class="text-muted">No parts have been requested yet.</p>
                         </div>
-                    </div>
-
-                    <!-- Conversation History -->
-                     <div class="card shadow mb-4">
-                        <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Conversation History</h6></div>
-                        <div class="card-body">
-                             <div th:each="response : ${repair.ticket.responses}" class="mb-3 border-bottom pb-3">
-                                 <strong><i class="fas fa-user"></i> <span th:text="${response.user.fullName}"></span></strong>:
-                                 <p class="mt-1" th:text="${response.message}"></p>
-                            </div>
-                            <form th:action="@{/technician/repairs/{id}/reply(id=${repair.repairId})}" th:object="${newResponse}" method="post">
-                                 <textarea class="form-control" rows="4" th:field="*{message}" placeholder="Type your response..."></textarea>
-                                 <button type="submit" class="btn btn-primary mt-2">Post Reply</button>
-                             </form>
-                         </div>
                     </div>
                 </div>
             </div>

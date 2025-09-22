@@ -1,35 +1,35 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{layouts/dashboard-layout :: head('Create New Ticket')}"></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layouts/dashboard-layout :: head(${ticket.ticketId == null ? 'New Ticket' : 'Edit Ticket'})}"></head>
 <body>
 <div class="wrapper">
     <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <h1 class="h3 mb-2 text-light">Create a New Support Ticket</h1>
-            <p class="mb-4">Please fill out the form below to submit a ticket. Our team will get back to you as soon as possible.</p>
+            <h1 class="h3 mb-2 text-dark" th:text="${ticket.ticketId == null ? 'Create New Support Ticket' : 'Edit Ticket'}"></h1>
             <div class="card shadow mb-4">
-                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary" th:text="${ticket.ticketId == null} ? 'New Ticket Details' : 'Edit Ticket Details'"></h6></div>
                 <div class="card-body">
-                    <form th:action="${ticket.ticketId == null} ? @{/customer/tickets/new} : @{/customer/tickets/{id}/edit(id=${ticket.ticketId})}" th:object="${ticket}" method="post">
+                    <form th:action="${ticket.ticketId == null} ? @{/customer/tickets/new} : @{/customer/tickets/{id}/edit(id=${ticket.ticketId})}"
+                          th:object="${ticket}" method="post">
                         <input type="hidden" th:field="*{ticketId}" />
                         <div class="mb-3">
                             <label for="subject" class="form-label">Subject</label>
-                            <input type="text" class="form-control" id="subject" th:field="*{subject}" placeholder="e.g., My computer won't turn on" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" th:field="*{description}" rows="6" placeholder="Please describe your issue in detail..." required></textarea>
+                            <input type="text" class="form-control" id="subject" th:field="*{subject}" required>
                         </div>
                         <div class="mb-3">
                             <label for="priority" class="form-label">Priority</label>
-                            <select class="form-select" id="priority" th:field="*{priority}" required>
-                                <option value="">Select Priority</option>
-                                <option th:each="p : ${priorities}" th:value="${p}" th:text="${#strings.capitalize(#strings.toLowerCase(p.name()))}"></option>
+                            <select id="priority" class="form-select" th:field="*{priority}">
+                                <option th:each="p : ${T(com.bytex.customercaresystem.model.TicketPriority).values()}"
+                                        th:value="${p}" th:text="${p}"></option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit Ticket</button>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" th:field="*{description}" rows="8" required
+                                      placeholder="Please describe your issue in detail."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Ticket</button>
                         <a th:href="@{/customer/dashboard}" class="btn btn-secondary">Cancel</a>
                     </form>
                 </div>

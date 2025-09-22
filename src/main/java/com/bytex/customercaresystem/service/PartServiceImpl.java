@@ -1,6 +1,7 @@
 package com.bytex.customercaresystem.service;
 
 import com.bytex.customercaresystem.model.Part;
+import com.bytex.customercaresystem.model.PartStatus;
 import com.bytex.customercaresystem.repository.PartRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +34,13 @@ public class PartServiceImpl implements PartService {
 
     @Override
     public List<Part> findLowStockParts() {
-        return partRepository.findByStatusIn(java.util.List.of(com.bytex.customercaresystem.model.PartStatus.LOW_STOCK, com.bytex.customercaresystem.model.PartStatus.OUT_OF_STOCK));
+        return partRepository.findByStatusIn(List.of(PartStatus.LOW_STOCK, PartStatus.OUT_OF_STOCK));
     }
 
     @Override
     public void discontinuePart(Long id) {
         Part part = findById(id).orElseThrow(() -> new RuntimeException("Part not found with id: " + id));
-        part.setStatus(com.bytex.customercaresystem.model.PartStatus.DISCONTINUED);
+        part.setStatus(PartStatus.DISCONTINUED);
         partRepository.save(part);
     }
 }
