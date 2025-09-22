@@ -9,6 +9,13 @@
         <div class="container-fluid">
             <h1 class="h3 mb-2 text-light">Inventory Dashboard</h1>
             <p class="mb-4">Monitor low-stock items and manage incoming part requests from technicians.</p>
+
+            <!-- Low Stock Alert -->
+            <div th:if="${!#lists.isEmpty(lowStockParts)}" class="alert alert-warning" role="alert">
+                <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Low Stock Alert!</h4>
+                <p>There are <strong th:text="${#lists.size(lowStockParts)}"></strong> items that are low on stock or out of stock. Please review the list below and create restock requests as needed.</p>
+            </div>
+
             <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
             <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
             <div class="card shadow mb-4">

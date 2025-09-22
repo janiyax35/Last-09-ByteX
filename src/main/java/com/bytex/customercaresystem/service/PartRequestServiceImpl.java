@@ -104,11 +104,48 @@ public class PartRequestServiceImpl implements PartRequestService {
 
     @Override
     public java.util.List<PartRequest> findWarehousePendingRequests() {
-        return partRequestRepository.findByStatus(PartRequestStatus.PENDING_WAREHOUSE);
+        return partRequestRepository.findByStatusWithDetails(PartRequestStatus.PENDING_WAREHOUSE);
     }
 
     @Override
     public java.util.Optional<PartRequest> findById(Long id) {
         return partRequestRepository.findById(id);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public PartRequest fulfillRequestFromWarehouse(Long requestId) throws Exception {
+        PartRequest request = partRequestRepository.findById(requestId)
+                .orElseThrow(() -> new Exception("Part request not found."));
+
+        Part part = request.getPart();
+        if (part.getCurrentStock() < request.getQuantity()) {
+            throw new Exception("Insufficient stock for part: " + part.getPartName());
+        }
+
+        // Deduct stock
+        part.setCurrentStock(part.getCurrentStock() - request.getQuantity());
+
+        // Update part status if necessary
+        if (part.getCurrentStock() == 0) {
+            part.setStatus(com.bytex.customercaresystem.model.PartStatus.OUT_OF_STOCK);
+        } else if (part.getCurrentStock() < part.getMinimumStock()) {
+            part.setStatus(com.bytex.customercaresystem.model.PartStatus.LOW_STOCK);
+        }
+        partRepository.save(part);
+
+        // Update ticket stage to notify technician
+        com.bytex.customercaresystem.model.Repair repair = request.getRepair();
+        if(repair != null) {
+            com.bytex.customercaresystem.model.Ticket ticket = repair.getTicket();
+            if (ticket != null) {
+                ticket.setStage(com.bytex.customercaresystem.model.TicketStage.WITH_TECHNICIAN);
+                ticketRepository.save(ticket);
+            }
+        }
+
+        request.setStatus(PartRequestStatus.FULFILLED);
+        request.setFulfillmentDate(java.time.LocalDateTime.now());
+        return partRequestRepository.save(request);
     }
 }

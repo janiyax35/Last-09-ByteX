@@ -1,217 +1,218 @@
 -- ===================================================================
--- BytEx Customer Care System - Complete Database Setup Script
--- This script will DROP existing tables, CREATE new ones, and INSERT sample data.
+-- ByteX Customer Care System - Full Database Setup
+-- Database: final_bytex_customer_care_system
+-- This script uses ENUM ORDINAL VALUES (integers) for all enum fields.
 -- ===================================================================
 
-SET FOREIGN_KEY_CHECKS = 0;
-
+-- Drop existing tables in reverse order of dependency
 DROP TABLE IF EXISTS `order_items`;
-DROP TABLE IF EXISTS `repair_parts`;
-DROP TABLE IF EXISTS `attachments`;
-DROP TABLE IF EXISTS `responses`;
-DROP TABLE IF EXISTS `part_requests`;
 DROP TABLE IF EXISTS `purchase_orders`;
+DROP TABLE IF EXISTS `supplier_parts`;
+DROP TABLE IF EXISTS `part_requests`;
+DROP TABLE IF EXISTS `repair_parts`;
 DROP TABLE IF EXISTS `repairs`;
+DROP TABLE IF EXISTS `responses`;
 DROP TABLE IF EXISTS `tickets`;
 DROP TABLE IF EXISTS `activity_logs`;
-DROP TABLE IF EXISTS `parts`;
 DROP TABLE IF EXISTS `suppliers`;
+DROP TABLE IF EXISTS `parts`;
 DROP TABLE IF EXISTS `users`;
 
-SET FOREIGN_KEY_CHECKS = 1;
-
 -- ===================================================================
---  TABLE CREATION
+-- Table Creation
 -- ===================================================================
 
+-- Users Table
 CREATE TABLE `users` (
   `user_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `created_at` DATETIME(6) NOT NULL,
-  `email` VARCHAR(100) NOT NULL,
-  `full_name` VARCHAR(100) NOT NULL,
-  `last_login` DATETIME(6),
-  `password` VARCHAR(255) NOT NULL,
-  `phone_number` VARCHAR(20),
-  `role` VARCHAR(20) NOT NULL,
-  `username` VARCHAR(50) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `role` tinyint NOT NULL COMMENT '0=CUSTOMER, 1=STAFF, 2=TECHNICIAN, 3=PRODUCT_MANAGER, 4=WAREHOUSE_MANAGER, 5=ADMIN',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `last_login` datetime DEFAULT NULL,
   PRIMARY KEY (`user_id`),
-  UNIQUE (`username`),
-  UNIQUE (`email`)
-);
+  UNIQUE KEY `UK_username` (`username`),
+  UNIQUE KEY `UK_email` (`email`)
+) ENGINE=InnoDB;
 
-CREATE TABLE `suppliers` (
-  `supplier_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `address` TEXT,
-  `contact_info` VARCHAR(255),
-  `created_at` DATETIME(6) NOT NULL,
-  `supplier_name` VARCHAR(100) NOT NULL,
-  PRIMARY KEY (`supplier_id`),
-  UNIQUE (`supplier_name`)
-);
-
+-- Parts Table
 CREATE TABLE `parts` (
   `part_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `category` VARCHAR(50) NOT NULL,
-  `current_stock` INT NOT NULL,
-  `description` TEXT,
-  `minimum_stock` INT NOT NULL,
-  `part_name` VARCHAR(100) NOT NULL,
-  `part_number` VARCHAR(50) NOT NULL,
-  `status` VARCHAR(20) NOT NULL,
-  `unit_price` DECIMAL(10,2) NOT NULL,
+  `part_number` varchar(50) NOT NULL,
+  `part_name` varchar(100) NOT NULL,
+  `description` text,
+  `current_stock` int NOT NULL DEFAULT '0',
+  `minimum_stock` int NOT NULL DEFAULT '5',
+  `unit_price` decimal(10,2) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=ACTIVE, 1=LOW_STOCK, 2=OUT_OF_STOCK, 3=DISCONTINUED',
   PRIMARY KEY (`part_id`),
-  UNIQUE (`part_number`)
-);
+  UNIQUE KEY `UK_part_number` (`part_number`)
+) ENGINE=InnoDB;
 
+-- Suppliers Table
+CREATE TABLE `suppliers` (
+  `supplier_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(100) NOT NULL,
+  `contact_info` varchar(255) DEFAULT NULL,
+  `address` text,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`supplier_id`)
+) ENGINE=InnoDB;
+
+-- Supplier_Parts Junction Table
+CREATE TABLE `supplier_parts` (
+  `supplier_id` BIGINT NOT NULL,
+  `part_id` BIGINT NOT NULL,
+  PRIMARY KEY (`supplier_id`, `part_id`),
+  KEY `fk_supplierparts_part` (`part_id`),
+  CONSTRAINT `fk_supplierparts_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`),
+  CONSTRAINT `fk_supplierparts_part` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`)
+) ENGINE=InnoDB;
+
+-- Tickets Table
 CREATE TABLE `tickets` (
   `ticket_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `archived` BOOLEAN NOT NULL,
-  `archived_at` DATETIME(6),
-  `closed_at` DATETIME(6),
-  `created_at` DATETIME(6) NOT NULL,
-  `description` TEXT NOT NULL,
-  `priority` VARCHAR(10) NOT NULL,
-  `status` VARCHAR(20) NOT NULL,
-  `stage` VARCHAR(30) NOT NULL,
-  `subject` VARCHAR(100) NOT NULL,
-  `updated_at` DATETIME(6),
-  `assigned_to_id` BIGINT,
   `customer_id` BIGINT NOT NULL,
+  `assigned_to_id` BIGINT DEFAULT NULL,
+  `subject` varchar(100) NOT NULL,
+  `description` text NOT NULL,
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=OPEN, 1=IN_PROGRESS, 2=PENDING, 3=RESOLVED, 4=CLOSED',
+  `priority` tinyint NOT NULL DEFAULT '1' COMMENT '0=LOW, 1=MEDIUM, 2=HIGH, 3=CRITICAL',
+  `stage` tinyint DEFAULT NULL COMMENT '0=AWAITING_ACCEPTANCE, 1=WITH_STAFF, 2=WITH_TECHNICIAN, 3=AWAITING_PARTS, 4=WAREHOUSE_REQUESTED, 5=SUPPLIER_ORDERED, 6=RESOLVED, 7=CLOSED',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `closed_at` datetime DEFAULT NULL,
+  `archived` bit(1) NOT NULL DEFAULT b'0',
+  `archived_at` datetime DEFAULT NULL,
   PRIMARY KEY (`ticket_id`),
-  FOREIGN KEY (`assigned_to_id`) REFERENCES `users` (`user_id`),
-  FOREIGN KEY (`customer_id`) REFERENCES `users` (`user_id`)
-);
+  KEY `fk_tickets_customer` (`customer_id`),
+  KEY `fk_tickets_assigned_to` (`assigned_to_id`),
+  CONSTRAINT `fk_tickets_customer` FOREIGN KEY (`customer_id`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk_tickets_assigned_to` FOREIGN KEY (`assigned_to_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB;
 
-CREATE TABLE `repairs` (
-  `repair_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `completion_date` DATETIME(6),
-  `diagnosis` TEXT NOT NULL,
-  `repair_details` TEXT,
-  `start_date` DATETIME(6),
-  `status` VARCHAR(20) NOT NULL,
-  `technician_id` BIGINT NOT NULL,
-  `ticket_id` BIGINT NOT NULL,
-  PRIMARY KEY (`repair_id`),
-  FOREIGN KEY (`technician_id`) REFERENCES `users` (`user_id`),
-  FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`ticket_id`)
-);
-
-CREATE TABLE `part_requests` (
-  `request_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `fulfillment_date` DATETIME(6),
-  `quantity` INT NOT NULL,
-  `reason` TEXT,
-  `request_date` DATETIME(6),
-  `status` VARCHAR(20) NOT NULL,
-  `part_id` BIGINT NOT NULL,
-  `requestor_id` BIGINT NOT NULL,
-  `repair_id` BIGINT,
-  PRIMARY KEY (`request_id`),
-  FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`),
-  FOREIGN KEY (`requestor_id`) REFERENCES `users` (`user_id`),
-  FOREIGN KEY (`repair_id`) REFERENCES `repairs` (`repair_id`)
-);
-
+-- Responses Table
 CREATE TABLE `responses` (
   `response_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `created_at` DATETIME(6) NOT NULL,
-  `message` TEXT NOT NULL,
   `ticket_id` BIGINT NOT NULL,
   `user_id` BIGINT NOT NULL,
+  `message` text NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`response_id`),
-  FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`ticket_id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-);
+  KEY `fk_responses_ticket` (`ticket_id`),
+  KEY `fk_responses_user` (`user_id`),
+  CONSTRAINT `fk_responses_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`ticket_id`),
+  CONSTRAINT `fk_responses_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB;
 
-CREATE TABLE `attachments` (
-  `attachment_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `file_name` VARCHAR(255) NOT NULL,
-  `file_path` VARCHAR(255) NOT NULL,
-  `file_size` INT NOT NULL,
-  `file_type` VARCHAR(100) NOT NULL,
-  `response_id` BIGINT,
-  `ticket_id` BIGINT,
-  `uploaded_at` DATETIME(6) NOT NULL,
-  `uploaded_by` BIGINT NOT NULL,
-  PRIMARY KEY (`attachment_id`),
-  FOREIGN KEY (`response_id`) REFERENCES `responses` (`response_id`),
-  FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`ticket_id`),
-  FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`user_id`)
-);
+-- Repairs Table
+CREATE TABLE `repairs` (
+  `repair_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `ticket_id` BIGINT NOT NULL,
+  `technician_id` BIGINT NOT NULL,
+  `diagnosis` text,
+  `repair_details` text,
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=PENDING, 1=IN_PROGRESS, 2=WAITING_FOR_PARTS, 3=COMPLETED, 4=FAILED',
+  `start_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `completion_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`repair_id`),
+  KEY `fk_repairs_ticket` (`ticket_id`),
+  KEY `fk_repairs_technician` (`technician_id`),
+  CONSTRAINT `fk_repairs_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`ticket_id`),
+  CONSTRAINT `fk_repairs_technician` FOREIGN KEY (`technician_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB;
 
-CREATE TABLE `repair_parts` (
+-- PartRequests Table
+CREATE TABLE `part_requests` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `part_id` BIGINT NOT NULL,
-  `repair_id` BIGINT NOT NULL,
-  `quantity` INT NOT NULL,
-  PRIMARY KEY (`part_id`, `repair_id`),
-  FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`),
-  FOREIGN KEY (`repair_id`) REFERENCES `repairs` (`repair_id`)
-);
+  `requestor_id` BIGINT NOT NULL,
+  `repair_id` BIGINT DEFAULT NULL,
+  `quantity` int NOT NULL DEFAULT '1',
+  `reason` text,
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=PENDING, 1=APPROVED, 2=FULFILLED, 3=REJECTED, 4=PENDING_WAREHOUSE, 5=PURCHASE_ORDERED',
+  `request_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fulfillment_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_partrequests_part` (`part_id`),
+  KEY `fk_partrequests_requestor` (`requestor_id`),
+  KEY `fk_partrequests_repair` (`repair_id`),
+  CONSTRAINT `fk_partrequests_part` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`),
+  CONSTRAINT `fk_partrequests_requestor` FOREIGN KEY (`requestor_id`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk_partrequests_repair` FOREIGN KEY (`repair_id`) REFERENCES `repairs` (`repair_id`)
+) ENGINE=InnoDB;
 
+-- PurchaseOrders Table
 CREATE TABLE `purchase_orders` (
   `order_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `actual_delivery` DATETIME(6),
-  `expected_delivery` DATETIME(6),
-  `order_date` DATETIME(6),
-  `status` VARCHAR(20) NOT NULL,
-  `total_amount` DECIMAL(10,2) NOT NULL,
   `created_by_id` BIGINT NOT NULL,
   `supplier_id` BIGINT NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=PENDING, 1=APPROVED, 2=SHIPPED, 3=DELIVERED, 4=CANCELLED',
+  `order_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expected_delivery` datetime DEFAULT NULL,
+  `actual_delivery` datetime DEFAULT NULL,
+  `vendor_name` varchar(100) NOT NULL,
   PRIMARY KEY (`order_id`),
-  FOREIGN KEY (`created_by_id`) REFERENCES `users` (`user_id`),
-  FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`)
-);
+  KEY `fk_purchaseorders_createdby` (`created_by_id`),
+  KEY `fk_purchaseorders_supplier` (`supplier_id`),
+  CONSTRAINT `fk_purchaseorders_createdby` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `fk_purchaseorders_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`)
+) ENGINE=InnoDB;
 
+-- OrderItems Table
 CREATE TABLE `order_items` (
   `order_id` BIGINT NOT NULL,
   `part_id` BIGINT NOT NULL,
-  `quantity` INT NOT NULL,
-  `unit_price` DECIMAL(10,2) NOT NULL,
-  PRIMARY KEY (`order_id`, `part_id`),
-  FOREIGN KEY (`order_id`) REFERENCES `purchase_orders` (`order_id`),
-  FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`)
-);
+  `quantity` int NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`order_id`,`part_id`),
+  KEY `fk_orderitems_part` (`part_id`),
+  CONSTRAINT `fk_orderitems_order` FOREIGN KEY (`order_id`) REFERENCES `purchase_orders` (`order_id`),
+  CONSTRAINT `fk_orderitems_part` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`)
+) ENGINE=InnoDB;
 
-CREATE TABLE `activity_logs` (
-  `log_id` BIGINT NOT NULL AUTO_INCREMENT,
-  `action_type` VARCHAR(50) NOT NULL,
-  `created_at` DATETIME(6) NOT NULL,
-  `description` TEXT,
-  `entity_id` BIGINT,
-  `entity_type` VARCHAR(50) NOT NULL,
-  `ip_address` VARCHAR(50),
-  `user_id` BIGINT,
-  PRIMARY KEY (`log_id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-);
 
 -- ===================================================================
---  SAMPLE DATA INSERTION
+-- Sample Data Insertion (Using ORDINAL values for enums)
 -- ===================================================================
 
-INSERT INTO users (username, password, email, full_name, phone_number, role) VALUES
-('admin', 'admin123', 'admin@bytex.com', 'System Administrator', '+94711234567', 'ADMIN'),
-('john.staff', 'staff123', 'john@bytex.com', 'John Smith', '+94712345678', 'STAFF'),
-('sarah.staff', 'staff123', 'sarah@bytex.com', 'Sarah Johnson', '+94713456789', 'STAFF'),
-('mike.tech', 'tech123', 'mike@bytex.com', 'Mike Chen', '+94714567890', 'TECHNICIAN'),
-('laura.tech', 'tech123', 'laura@bytex.com', 'Laura Silva', '+94715678901', 'TECHNICIAN'),
-('david.pm', 'pm123', 'david@bytex.com', 'David Perera', '+94716789012', 'PRODUCT_MANAGER'),
-('priya.wm', 'wm123', 'priya@bytex.com', 'Priya Fernando', '+94717890123', 'WAREHOUSE_MANAGER'),
-('raj.customer', 'pass123', 'raj@gmail.com', 'Raj Mendis', '+94718901234', 'CUSTOMER'),
-('anita.customer', 'pass123', 'anita@outlook.com', 'Anita De Silva', '+94719012345', 'CUSTOMER');
+-- Users: 0=CUSTOMER, 1=STAFF, 2=TECHNICIAN, 3=PRODUCT_MANAGER, 4=WAREHOUSE_MANAGER, 5=ADMIN
+INSERT INTO `users` (username, password, email, full_name, phone_number, role) VALUES
+('admin', 'root', 'admin@bytex.com', 'System Admin', '+94711234567', 5),
+('staff', 'staff', 'staff@bytex.com', 'John Staff', '+94712345678', 1),
+('tech', 'tech', 'tech@bytex.com', 'Mike Technician', '+94714567890', 2),
+('pm', 'pm', 'pm@bytex.com', 'Patricia Manager', '+94716789012', 3),
+('wm', 'wm', 'wm@bytex.com', 'Walter Manager', '+94717890123', 4),
+('customer', 'customer', 'customer@gmail.com', 'Chris Customer', '+94718901234', 0);
 
-INSERT INTO parts (part_number, part_name, description, current_stock, minimum_stock, unit_price, category, status) VALUES
-('CPU001', 'Intel Core i7-12700K', 'High performance CPU', 15, 5, 399.99, 'CPU', 'ACTIVE'),
-('RAM001', 'Corsair Vengeance 16GB DDR4', 'High performance RAM', 30, 10, 79.99, 'RAM', 'ACTIVE'),
-('GPU001', 'NVIDIA RTX 3080', 'High-end graphics card', 5, 3, 699.99, 'GPU', 'LOW_STOCK'),
-('SSD001', 'Samsung 970 EVO 1TB', 'NVMe SSD', 0, 5, 149.99, 'Storage', 'OUT_OF_STOCK');
+-- Parts: 0=ACTIVE, 1=LOW_STOCK, 2=OUT_OF_STOCK, 3=DISCONTINUED
+INSERT INTO `parts` (part_number, part_name, description, current_stock, minimum_stock, unit_price, category, status) VALUES
+('CPU-001', 'Intel Core i9-13900K', 'High-performance CPU for gaming and productivity.', 10, 5, 589.99, 'CPU', 0),
+('GPU-001', 'NVIDIA RTX 4090', 'Top-tier graphics card for 4K gaming.', 4, 3, 1599.99, 'GPU', 1),
+('RAM-001', 'Corsair Vengeance 32GB DDR5', 'High-speed DDR5 RAM for modern systems.', 25, 10, 129.99, 'RAM', 0),
+('SSD-001', 'Samsung 980 Pro 2TB', 'Blazing fast NVMe SSD for OS and games.', 1, 5, 169.99, 'Storage', 2);
 
-INSERT INTO tickets (customer_id, subject, description, status, stage, priority, assigned_to_id) VALUES
-(8, 'My computer is running slow', 'Ever since the last update, my PC takes forever to boot up.', 'IN_PROGRESS', 'WITH_STAFF', 'MEDIUM', 2),
-(9, 'Graphics card not detected', 'My new monitor is blank, and the system does not see my graphics card.', 'IN_PROGRESS', 'WITH_TECHNICIAN', 'HIGH', 3);
+-- Suppliers
+INSERT INTO `suppliers` (supplier_name, contact_info) VALUES
+('Global Tech Imports', 'sales@globaltech.com'),
+('PC Parts Direct', 'contact@pcpartsdirect.net'),
+('Silicon Valley Distribution', 'orders@svd.com');
 
-INSERT INTO repairs (repair_id, ticket_id, technician_id, diagnosis, status) VALUES
-(1, 2, 4, 'Initial diagnosis suggests the GPU may be faulty. Physical inspection required.', 'PENDING');
+-- Supplier_Parts (Linking suppliers to the parts they provide)
+-- Global Tech Imports (ID 1) supplies CPUs (ID 1) and GPUs (ID 2)
+INSERT INTO `supplier_parts` (supplier_id, part_id) VALUES (1, 1), (1, 2);
+-- PC Parts Direct (ID 2) supplies RAM (ID 3) and SSDs (ID 4)
+INSERT INTO `supplier_parts` (supplier_id, part_id) VALUES (2, 3), (2, 4);
+-- Silicon Valley Distribution (ID 3) supplies everything
+INSERT INTO `supplier_parts` (supplier_id, part_id) VALUES (3, 1), (3, 2), (3, 3), (3, 4);
 
-INSERT INTO part_requests (part_id, requestor_id, quantity, reason, status, repair_id) VALUES
-(3, 4, 1, 'Replacement for potentially faulty GPU in ticket #2.', 'PENDING', 1);
+-- A sample ticket from Chris Customer (ID 6)
+-- Status: 0=OPEN, Priority: 2=HIGH, Stage: 0=AWAITING_ACCEPTANCE
+INSERT INTO `tickets` (customer_id, subject, description, status, priority, stage, created_at, updated_at) VALUES
+(6, 'My computer is making a loud noise', 'Ever since I installed the new graphics card, there is a loud whirring noise. It gets worse when I play games.', 0, 2, 0, NOW(), NOW());

@@ -103,4 +103,11 @@ public interface TicketService {
      * @return The updated ticket.
      */
     Ticket updateTicketStage(Long ticketId, com.bytex.customercaresystem.model.TicketStage stage);
+
+    /**
+     * Searches for tickets based on a keyword.
+     * @param keyword The keyword to search for.
+     * @return A list of matching tickets.
+     */
+    List<Ticket> searchTickets(String keyword);
 }

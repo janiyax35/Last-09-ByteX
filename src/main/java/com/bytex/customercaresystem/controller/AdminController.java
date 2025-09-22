@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -24,6 +25,12 @@ public class AdminController {
         this.userService = userService;
         this.activityLogService = activityLogService;
         this.ticketService = ticketService;
+    }
+
+    private User getLoggedInUser(org.springframework.security.core.Authentication authentication) {
+        String username = authentication.getName();
+        return userService.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found in database"));
     }
 
     @GetMapping("/dashboard")
@@ -73,10 +80,8 @@ public class AdminController {
 
     @GetMapping("/users/delete/{id}")
     public String deleteUser(@org.springframework.web.bind.annotation.PathVariable Long id, RedirectAttributes redirectAttributes, org.springframework.security.core.Authentication authentication) {
-        // Prevent admin from deleting themselves
-        String loggedInUsername = authentication.getName();
-        User userToDelete = userService.findByUsername(loggedInUsername).orElse(null);
-        if (userToDelete != null && userToDelete.getUserId().equals(id)) {
+        User loggedInUser = getLoggedInUser(authentication);
+        if (loggedInUser.getUserId().equals(id)) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error: You cannot delete your own account.");
             return "redirect:/admin/users";
         }
@@ -99,7 +104,13 @@ public class AdminController {
     @PostMapping("/users/edit/{id}")
     public String updateUser(@org.springframework.web.bind.annotation.PathVariable Long id, User user, RedirectAttributes redirectAttributes, org.springframework.security.core.Authentication authentication) {
         try {
-            userService.updateUser(id, user, authentication);
+            User loggedInUser = getLoggedInUser(authentication);
+            if (loggedInUser.getUserId().equals(id) && user.getRole() != loggedInUser.getRole()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Error: You cannot change your own role.");
+                return "redirect:/admin/users/edit/" + id;
+            }
+
+            userService.updateUser(id, user);
             redirectAttributes.addFlashAttribute("successMessage", "User updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating user: " + e.getMessage());
@@ -115,8 +126,15 @@ public class AdminController {
     }
 
     @GetMapping("/tickets")
-    public String monitorTickets(Model model) {
-        model.addAttribute("tickets", ticketService.findAllTickets());
+    public String monitorTickets(Model model, @RequestParam(required = false) String keyword) {
+        List<com.bytex.customercaresystem.model.Ticket> tickets;
+        if (keyword != null && !keyword.isEmpty()) {
+            tickets = ticketService.searchTickets(keyword);
+            model.addAttribute("keyword", keyword);
+        } else {
+            tickets = ticketService.findAllTickets();
+        }
+        model.addAttribute("tickets", tickets);
         model.addAttribute("pageTitle", "All System Tickets");
         return "admin/all-tickets";
     }

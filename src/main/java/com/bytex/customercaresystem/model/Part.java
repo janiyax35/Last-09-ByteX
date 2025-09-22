@@ -41,6 +41,9 @@ public class Part {
     @OneToMany(mappedBy = "part")
     private Set<RepairPart> repairParts;
 
+    @ManyToMany(mappedBy = "parts")
+    private Set<Supplier> suppliers;
+
     // Constructors
     public Part() {
     }
@@ -124,6 +127,14 @@ public class Part {
 
     public void setRepairParts(Set<RepairPart> repairParts) {
         this.repairParts = repairParts;
+    }
+
+    public Set<Supplier> getSuppliers() {
+        return suppliers;
+    }
+
+    public void setSuppliers(Set<Supplier> suppliers) {
+        this.suppliers = suppliers;
     }
 
     // equals, hashCode, toString

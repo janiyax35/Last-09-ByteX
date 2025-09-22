@@ -4,6 +4,8 @@ import com.bytex.customercaresystem.model.Ticket;
 import com.bytex.customercaresystem.model.TicketStatus;
 import com.bytex.customercaresystem.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -37,4 +39,13 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      * @return A list of unassigned tickets.
      */
     List<Ticket> findByAssignedToIsNull();
+
+    @Query("SELECT t FROM Ticket t " +
+           "LEFT JOIN t.customer c " +
+           "LEFT JOIN t.assignedTo a " +
+           "WHERE LOWER(t.subject) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(c.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(a.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Ticket> searchByKeyword(@Param("keyword") String keyword);
 }

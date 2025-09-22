@@ -38,8 +38,8 @@ public class SecurityConfig {
                 .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/images/**", "/webfonts/**", "/favicon.ico").permitAll()
                 // Role-based authorization
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/staff/**").hasAuthority("ROLE_STAFF")
-                .requestMatchers("/technician/**").hasAuthority("ROLE_TECHNICIAN")
+                .requestMatchers("/staff/**").hasAnyAuthority("ROLE_STAFF", "ROLE_ADMIN")
+                .requestMatchers("/technician/**").hasAnyAuthority("ROLE_TECHNICIAN", "ROLE_ADMIN")
                 .requestMatchers("/productmanager/**").hasAuthority("ROLE_PRODUCT_MANAGER")
                 .requestMatchers("/warehouse/**").hasAuthority("ROLE_WAREHOUSE_MANAGER")
                 .requestMatchers("/customer/**").hasAuthority("ROLE_CUSTOMER")

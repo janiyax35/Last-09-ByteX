@@ -35,4 +35,9 @@ public class SupplierServiceImpl implements SupplierService {
     public Optional<Supplier> findById(Long id) {
         return supplierRepository.findById(id);
     }
+
+    @Override
+    public List<Supplier> findByParts(com.bytex.customercaresystem.model.Part part) {
+        return supplierRepository.findByParts(part);
+    }
 }

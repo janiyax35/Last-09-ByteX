@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SupplierRepository extends JpaRepository<Supplier, Long> {
-    // Basic CRUD methods are inherited from JpaRepository
+
+    java.util.List<Supplier> findByParts(com.bytex.customercaresystem.model.Part part);
 }

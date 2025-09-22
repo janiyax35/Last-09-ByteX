@@ -6,5 +6,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Long> {
-    // Basic CRUD methods are inherited from JpaRepository
+
+    @org.springframework.data.jpa.repository.Query("SELECT po FROM PurchaseOrder po JOIN FETCH po.createdBy JOIN FETCH po.supplier")
+    @Override
+    java.util.List<PurchaseOrder> findAll();
 }

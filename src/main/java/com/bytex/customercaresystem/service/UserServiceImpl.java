@@ -69,13 +69,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long id, User userWithUpdates, org.springframework.security.core.Authentication authentication) throws Exception {
+    public User updateUser(Long id, User userWithUpdates) throws Exception {
         User existingUser = findById(id).orElseThrow(() -> new Exception("User not found with id: " + id));
-
-        // The username from the submitted form is ignored to prevent users from changing their own username.
-        if (!existingUser.getUsername().equals(userWithUpdates.getUsername())) {
-            // We do not update the username.
-        }
 
         // Check for email uniqueness if it has changed
         if (!existingUser.getEmail().equals(userWithUpdates.getEmail())) {
@@ -88,22 +83,10 @@ public class UserServiceImpl implements UserService {
         existingUser.setFullName(userWithUpdates.getFullName());
         existingUser.setPhoneNumber(userWithUpdates.getPhoneNumber());
 
-        // Simplified and corrected logic for role updates.
-        String loggedInUsername = authentication.getName();
-        User loggedInUser = findByUsername(loggedInUsername)
-                .orElseThrow(() -> new IllegalStateException("Currently authenticated user not found in database"));
-
-        // Check if the admin is trying to edit their own profile.
-        if (existingUser.getUserId().equals(loggedInUser.getUserId())) {
-            // If the role in the form is different from their current role, it's an error.
-            if (userWithUpdates.getRole() != null && existingUser.getRole() != userWithUpdates.getRole()) {
-                throw new Exception("Admins cannot change their own role.");
-            }
-        } else {
-            // If editing another user, update their role.
-            if (userWithUpdates.getRole() != null) {
-                existingUser.setRole(userWithUpdates.getRole());
-            }
+        // The controller is now responsible for the security check regarding role changes.
+        // The service layer simply applies the change if a role is provided.
+        if (userWithUpdates.getRole() != null) {
+            existingUser.setRole(userWithUpdates.getRole());
         }
 
         // Only update password if a new one is provided in the form

@@ -58,4 +58,12 @@ public interface PartRequestService {
      * @return An Optional containing the part request if found.
      */
     java.util.Optional<PartRequest> findById(Long id);
+
+    /**
+     * Allows a Warehouse Manager to fulfill a request directly from existing stock.
+     * @param requestId The ID of the request to fulfill.
+     * @return The updated part request.
+     * @throws Exception if stock is insufficient or request not found.
+     */
+    PartRequest fulfillRequestFromWarehouse(Long requestId) throws Exception;
 }

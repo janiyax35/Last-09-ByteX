@@ -18,4 +18,5 @@ public interface SupplierService {
 
     Optional<Supplier> findById(Long id);
 
+    List<Supplier> findByParts(com.bytex.customercaresystem.model.Part part);
 }
