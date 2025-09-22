@@ -40,12 +40,16 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      */
     List<Ticket> findByAssignedToIsNull();
 
-    @Query("SELECT t FROM Ticket t " +
-           "LEFT JOIN t.customer c " +
-           "LEFT JOIN t.assignedTo a " +
-           "WHERE LOWER(t.subject) LIKE :keyword OR " +
-           "LOWER(t.description) LIKE :keyword OR " +
-           "LOWER(c.fullName) LIKE :keyword OR " +
-           "LOWER(a.fullName) LIKE :keyword")
-    List<Ticket> searchByKeyword(@Param("keyword") String keyword);
+    /**
+     * Searches for tickets where the keyword is contained in the subject, description, customer's full name,
+     * or assigned staff's full name, ignoring case.
+     * @param keyword The keyword for the subject search.
+     * @param keyword2 The keyword for the description search.
+     * @param keyword3 The keyword for the customer name search.
+     * @param keyword4 The keyword for the assigned staff name search.
+     * @return A list of matching tickets.
+     */
+    List<Ticket> findBySubjectContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCustomerFullNameContainingIgnoreCaseOrAssignedToFullNameContainingIgnoreCase(
+        String keyword, String keyword2, String keyword3, String keyword4
+    );
 }

@@ -134,7 +134,8 @@ public class TicketServiceImpl implements TicketService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return findAllTickets();
         }
-        String formattedKeyword = "%" + keyword.toLowerCase() + "%";
-        return ticketRepository.searchByKeyword(formattedKeyword);
+        return ticketRepository.findBySubjectContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCustomerFullNameContainingIgnoreCaseOrAssignedToFullNameContainingIgnoreCase(
+            keyword, keyword, keyword, keyword
+        );
     }
 }
