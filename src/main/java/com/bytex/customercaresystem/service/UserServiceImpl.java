@@ -19,7 +19,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User saveUser(User user) {
-        // In a real app, you would encode the password here before saving
+        // In a real app, password would be encoded here.
         return userRepository.save(user);
     }
 
@@ -48,19 +48,12 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new Exception("Error: Username is already taken!");
         }
-
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new Exception("Error: Email is already in use!");
         }
-
-        User newUser = new User();
-        newUser.setFullName(user.getFullName());
-        newUser.setUsername(user.getUsername());
-        newUser.setEmail(user.getEmail());
-        newUser.setPassword(user.getPassword()); // Storing password in plain text as requested
-        newUser.setRole(Role.CUSTOMER);
-
-        return userRepository.save(newUser);
+        user.setRole(Role.CUSTOMER);
+        // Password is saved in plain text as requested.
+        return userRepository.save(user);
     }
 
     @Override
@@ -72,28 +65,20 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id, User userWithUpdates) throws Exception {
         User existingUser = findById(id).orElseThrow(() -> new Exception("User not found with id: " + id));
 
-        // Check for email uniqueness if it has changed
         if (!existingUser.getEmail().equals(userWithUpdates.getEmail())) {
             if (userRepository.findByEmail(userWithUpdates.getEmail()).isPresent()) {
                 throw new Exception("Error: Email is already in use!");
             }
             existingUser.setEmail(userWithUpdates.getEmail());
         }
-
         existingUser.setFullName(userWithUpdates.getFullName());
         existingUser.setPhoneNumber(userWithUpdates.getPhoneNumber());
-
-        // The controller is now responsible for the security check regarding role changes.
-        // The service layer simply applies the change if a role is provided.
         if (userWithUpdates.getRole() != null) {
             existingUser.setRole(userWithUpdates.getRole());
         }
-
-        // Only update password if a new one is provided in the form
         if (userWithUpdates.getPassword() != null && !userWithUpdates.getPassword().isEmpty()) {
             existingUser.setPassword(userWithUpdates.getPassword());
         }
-
         return userRepository.save(existingUser);
     }
 
@@ -106,25 +91,17 @@ public class UserServiceImpl implements UserService {
     public User updateUserProfile(Long id, User userWithUpdates) throws Exception {
         User existingUser = findById(id).orElseThrow(() -> new Exception("User not found with id: " + id));
 
-        // In the profile context, we do not allow username changes.
-        // We also check if the email is being changed to one that already exists.
         if (!existingUser.getEmail().equals(userWithUpdates.getEmail())) {
             if (userRepository.findByEmail(userWithUpdates.getEmail()).isPresent()) {
                 throw new Exception("Error: Email is already in use!");
             }
             existingUser.setEmail(userWithUpdates.getEmail());
         }
-
         existingUser.setFullName(userWithUpdates.getFullName());
         existingUser.setPhoneNumber(userWithUpdates.getPhoneNumber());
-
-        // Note: Role is intentionally NOT updated here.
-
-        // Only update password if a new one is provided in the form
         if (userWithUpdates.getPassword() != null && !userWithUpdates.getPassword().isEmpty()) {
             existingUser.setPassword(userWithUpdates.getPassword());
         }
-
         return userRepository.save(existingUser);
     }
 }

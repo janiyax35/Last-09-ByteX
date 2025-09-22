@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
 <head th:replace="~{layouts/dashboard-layout :: head('Ticket Details')}"></head>
 <body>
 <div class="wrapper">
@@ -7,46 +7,39 @@
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary" th:text="'Ticket #' + ${ticket.ticketId} + ' - ' + ${ticket.subject}">Ticket Details</h6>
-                    <div>
-                    <a th:if="${ticket.status.name() == 'OPEN'}" th:href="@{/customer/tickets/{id}/edit(id=${ticket.ticketId})}"
-                       class="btn btn-warning btn-sm">
-                        <i class="fas fa-edit"></i> Edit Ticket
-                    </a>
-                        <a th:if="${ticket.status.name() == 'OPEN'}" th:href="@{/customer/tickets/{id}/cancel(id=${ticket.ticketId})}"
-                           class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this ticket?');">
-                            <i class="fas fa-times"></i> Cancel Ticket
-                        </a>
-                        <a th:href="@{/customer/dashboard}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-                    </div>
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary" th:text="'Ticket #' + ${ticket.ticketId} + ' - ' + ${ticket.subject}"></h6>
+                    <a th:href="@{/customer/dashboard}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
                 </div>
                 <div class="card-body">
-                    <p th:if="${ticket.stage != null}"><strong>Stage:</strong>
-                        <span class="badge bg-info" th:text="${ticket.stage.displayName}">
-                            STAGE
-                        </span>
-                    </p>
-                    <p><strong>Priority:</strong> <span th:text="${ticket.priority.name()}"></span></p>
-                    <p><strong>Created:</strong> <span th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
-                    <p><strong>Last Updated:</strong> <span th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+                    <div class="row">
+                        <div class="col-md-4"><strong>Status:</strong> <span class="badge bg-primary" th:text="${ticket.status}"></span></div>
+                        <div class="col-md-4"><strong>Stage:</strong> <span class="badge bg-info" th:text="${ticket.stage?.displayName}"></span></div>
+                        <div class="col-md-4"><strong>Priority:</strong> <span class="badge bg-secondary" th:text="${ticket.priority}"></span></div>
+                    </div>
                     <hr>
                     <p><strong>Description:</strong></p>
                     <p th:text="${ticket.description}"></p>
+                    <div th:if="${ticket.status.name() == 'OPEN'}">
+                        <a th:href="@{/customer/tickets/{id}/edit(id=${ticket.ticketId})}" class="btn btn-warning btn-sm">Edit Ticket</a>
+                        <a th:href="@{/customer/tickets/{id}/delete(id=${ticket.ticketId})}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Cancel Ticket</a>
+                    </div>
                 </div>
             </div>
 
             <!-- Technician Notes -->
-            <div class="card shadow mb-4" th:if="${!#lists.isEmpty(ticket.repairs)}">
+            <div class="card shadow mb-4" th:if="${ticket.repairs != null and !ticket.repairs.isEmpty()}">
                 <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Technician Notes</h6></div>
                 <div class="card-body">
-                    <pre th:text="${ticket.repairs[0].repairDetails} ?: 'The technician has not added any notes yet.'"></pre>
+                    <pre th:each="repair : ${ticket.repairs}" th:text="${repair.repairDetails} ?: 'No notes added yet.'"></pre>
                 </div>
             </div>
 
+            <!-- Conversation History -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Conversation History</h6></div>
                 <div class="card-body">
@@ -60,15 +53,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Add Reply -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Add a Reply</h6></div>
                 <div class="card-body">
                     <form th:action="@{/customer/tickets/{id}/reply(id=${ticket.ticketId})}" th:object="${newResponse}" method="post">
-                        <div class="mb-3">
-                            <label for="message" class="form-label">Your Message</label>
-                            <textarea class="form-control" id="message" th:field="*{message}" rows="5" placeholder="Type your reply here..." required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Post Reply</button>
+                        <textarea class="form-control" rows="4" th:field="*{message}" placeholder="Type your reply here..." required></textarea>
+                        <button type="submit" class="btn btn-primary mt-2">Post Reply</button>
                     </form>
                 </div>
             </div>

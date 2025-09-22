@@ -1,88 +1,37 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layouts/dashboard-layout :: head('Admin Dashboard')}"></head>
-
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
-
-    <!-- Page Content -->
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
-
         <div class="container-fluid">
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-light">Admin Dashboard</h1>
-            </div>
-
-            <!-- Content Row -->
+            <h1 class="h3 mb-4 text-dark">Admin Dashboard</h1>
             <div class="row">
-                <!-- Total Users Card -->
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-2 bg-dark text-light">
+                    <div class="card border-left-primary shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Users</div>
-                                    <div class="h5 mb-0 font-weight-bold" th:text="${userCount}">0</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${userCount}">0</div>
                                 </div>
                                 <div class="col-auto"><i class="fas fa-users fa-2x text-gray-300"></i></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Total Customers Card -->
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-success shadow h-100 py-2 bg-dark text-light">
+                    <div class="card border-left-success shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Customers</div>
-                                    <div class="h5 mb-0 font-weight-bold" th:text="${customerCount}">0</div>
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Tickets</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${ticketCount}">0</div>
                                 </div>
-                                <div class="col-auto"><i class="fas fa-user-tag fa-2x text-gray-300"></i></div>
+                                <div class="col-auto"><i class="fas fa-ticket-alt fa-2x text-gray-300"></i></div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Total Staff Card -->
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-info shadow h-100 py-2 bg-dark text-light">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Staff Members</div>
-                                    <div class="h5 mb-0 font-weight-bold" th:text="${staffCount}">0</div>
-                                </div>
-                                <div class="col-auto"><i class="fas fa-user-shield fa-2x text-gray-300"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Total Technicians Card -->
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-2 bg-dark text-light">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Technicians</div>
-                                    <div class="h5 mb-0 font-weight-bold" th:text="${techCount}">0</div>
-                                </div>
-                                <div class="col-auto"><i class="fas fa-user-cog fa-2x text-gray-300"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">System Overview</h6></div>
-                        <div class="card-body">
-                            <p>Welcome to the ByteX Admin Dashboard. From here you can manage all system users and monitor site activity.</p>
-                            <p>Use the sidebar navigation to get started.</p>
                         </div>
                     </div>
                 </div>
@@ -90,9 +39,6 @@
         </div>
     </div>
 </div>
-
-<!-- Scripts -->
 <div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
-
 </body>
 </html>

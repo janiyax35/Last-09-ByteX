@@ -16,7 +16,7 @@ import java.util.Collection;
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -25,7 +25,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String targetUrl = determineTargetUrl(authentication);
 
         if (response.isCommitted()) {
-            System.out.println("Response has already been committed. Unable to redirect to " + targetUrl);
             return;
         }
 
@@ -33,7 +32,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     }
 
     protected String determineTargetUrl(Authentication authentication) {
-        String targetUrl = "/login?error"; // Default to error page
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
         for (GrantedAuthority grantedAuthority : authorities) {
@@ -51,8 +49,11 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                     return "/warehouse/dashboard";
                 case "ROLE_CUSTOMER":
                     return "/customer/dashboard";
+                default:
+                    throw new IllegalStateException("Unknown user role: " + authorityName);
             }
         }
-        return targetUrl;
+        // Should not happen if user has a role
+        return "/login?error";
     }
 }

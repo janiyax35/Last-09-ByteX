@@ -1,7 +1,7 @@
 -- ===================================================================
 -- ByteX Customer Care System - Full Database Setup
 -- Database: final_bytex_customer_care_system
--- This script uses STRING LITERALS for all enum fields.
+-- This script uses VARCHAR for all enum fields to align with EnumType.STRING
 -- ===================================================================
 
 -- Drop existing tables in reverse order of dependency
@@ -22,7 +22,6 @@ DROP TABLE IF EXISTS `users`;
 -- Table Creation
 -- ===================================================================
 
--- Users Table
 CREATE TABLE `users` (
   `user_id` BIGINT NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
@@ -39,7 +38,6 @@ CREATE TABLE `users` (
   UNIQUE KEY `UK_email` (`email`)
 ) ENGINE=InnoDB;
 
--- Parts Table
 CREATE TABLE `parts` (
   `part_id` BIGINT NOT NULL AUTO_INCREMENT,
   `part_number` varchar(50) NOT NULL,
@@ -54,7 +52,6 @@ CREATE TABLE `parts` (
   UNIQUE KEY `UK_part_number` (`part_number`)
 ) ENGINE=InnoDB;
 
--- Suppliers Table
 CREATE TABLE `suppliers` (
   `supplier_id` BIGINT NOT NULL AUTO_INCREMENT,
   `supplier_name` varchar(100) NOT NULL,
@@ -64,7 +61,6 @@ CREATE TABLE `suppliers` (
   PRIMARY KEY (`supplier_id`)
 ) ENGINE=InnoDB;
 
--- Supplier_Parts Junction Table
 CREATE TABLE `supplier_parts` (
   `supplier_id` BIGINT NOT NULL,
   `part_id` BIGINT NOT NULL,
@@ -74,7 +70,6 @@ CREATE TABLE `supplier_parts` (
   CONSTRAINT `fk_supplierparts_part` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`)
 ) ENGINE=InnoDB;
 
--- Tickets Table
 CREATE TABLE `tickets` (
   `ticket_id` BIGINT NOT NULL AUTO_INCREMENT,
   `customer_id` BIGINT NOT NULL,
@@ -96,7 +91,6 @@ CREATE TABLE `tickets` (
   CONSTRAINT `fk_tickets_assigned_to` FOREIGN KEY (`assigned_to_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB;
 
--- Responses Table
 CREATE TABLE `responses` (
   `response_id` BIGINT NOT NULL AUTO_INCREMENT,
   `ticket_id` BIGINT NOT NULL,
@@ -110,7 +104,6 @@ CREATE TABLE `responses` (
   CONSTRAINT `fk_responses_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB;
 
--- Repairs Table
 CREATE TABLE `repairs` (
   `repair_id` BIGINT NOT NULL AUTO_INCREMENT,
   `ticket_id` BIGINT NOT NULL,
@@ -127,7 +120,15 @@ CREATE TABLE `repairs` (
   CONSTRAINT `fk_repairs_technician` FOREIGN KEY (`technician_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB;
 
--- PartRequests Table
+CREATE TABLE `repair_parts` (
+  `repair_id` BIGINT NOT NULL,
+  `part_id` BIGINT NOT NULL,
+  `quantity` int NOT NULL DEFAULT '1',
+  PRIMARY KEY (`repair_id`, `part_id`),
+  CONSTRAINT `fk_repairparts_repair` FOREIGN KEY (`repair_id`) REFERENCES `repairs` (`repair_id`),
+  CONSTRAINT `fk_repairparts_part` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `part_requests` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `part_id` BIGINT NOT NULL,
@@ -147,7 +148,6 @@ CREATE TABLE `part_requests` (
   CONSTRAINT `fk_partrequests_repair` FOREIGN KEY (`repair_id`) REFERENCES `repairs` (`repair_id`)
 ) ENGINE=InnoDB;
 
--- PurchaseOrders Table
 CREATE TABLE `purchase_orders` (
   `order_id` BIGINT NOT NULL AUTO_INCREMENT,
   `created_by_id` BIGINT NOT NULL,
@@ -165,7 +165,6 @@ CREATE TABLE `purchase_orders` (
   CONSTRAINT `fk_purchaseorders_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`)
 ) ENGINE=InnoDB;
 
--- OrderItems Table
 CREATE TABLE `order_items` (
   `order_id` BIGINT NOT NULL,
   `part_id` BIGINT NOT NULL,
@@ -177,7 +176,15 @@ CREATE TABLE `order_items` (
   CONSTRAINT `fk_orderitems_part` FOREIGN KEY (`part_id`) REFERENCES `parts` (`part_id`)
 ) ENGINE=InnoDB;
 
--- ActivityLogs Table is removed as it's not fully implemented in the core logic.
+CREATE TABLE `activity_logs` (
+  `log_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT,
+  `action_type` VARCHAR(50) NOT NULL,
+  `description` TEXT,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`log_id`),
+  CONSTRAINT `fk_activitylogs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB;
 
 -- ===================================================================
 -- Sample Data Insertion (Using STRING values for enums)

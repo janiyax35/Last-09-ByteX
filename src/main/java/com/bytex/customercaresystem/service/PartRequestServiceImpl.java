@@ -1,27 +1,31 @@
 package com.bytex.customercaresystem.service;
 
-import com.bytex.customercaresystem.model.Part;
-import com.bytex.customercaresystem.model.PartRequest;
-import com.bytex.customercaresystem.model.PartRequestStatus;
-import com.bytex.customercaresystem.model.User;
+import com.bytex.customercaresystem.model.*;
+import com.bytex.customercaresystem.repository.PartRepository;
 import com.bytex.customercaresystem.repository.PartRequestRepository;
+import com.bytex.customercaresystem.repository.TicketRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PartRequestServiceImpl implements PartRequestService {
 
     private final PartRequestRepository partRequestRepository;
-    private final com.bytex.customercaresystem.repository.PartRepository partRepository;
-    private final com.bytex.customercaresystem.repository.TicketRepository ticketRepository;
+    private final PartRepository partRepository;
+    private final TicketRepository ticketRepository;
 
-    public PartRequestServiceImpl(PartRequestRepository partRequestRepository, com.bytex.customercaresystem.repository.PartRepository partRepository, com.bytex.customercaresystem.repository.TicketRepository ticketRepository) {
+    public PartRequestServiceImpl(PartRequestRepository partRequestRepository, PartRepository partRepository, TicketRepository ticketRepository) {
         this.partRequestRepository = partRequestRepository;
         this.partRepository = partRepository;
         this.ticketRepository = ticketRepository;
     }
 
     @Override
-    public PartRequest createPartRequest(User requestor, Part part, int quantity, String reason, com.bytex.customercaresystem.model.Repair repair) {
+    public PartRequest createPartRequest(User requestor, Part part, int quantity, String reason, Repair repair) {
         PartRequest newRequest = new PartRequest();
         newRequest.setRequestor(requestor);
         newRequest.setPart(part);
@@ -33,13 +37,23 @@ public class PartRequestServiceImpl implements PartRequestService {
     }
 
     @Override
-    public java.util.List<PartRequest> findPendingRequests() {
-        return partRequestRepository.findByStatusWithDetails(com.bytex.customercaresystem.model.PartRequestStatus.PENDING);
+    public List<PartRequest> findPendingRequests() {
+        return partRequestRepository.findByStatusWithDetails(PartRequestStatus.PENDING);
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public PartRequest approveRequest(Long requestId) throws Exception {
+        return fulfillRequest(requestId);
+    }
+
+    @Override
+    @Transactional
+    public PartRequest fulfillRequestFromWarehouse(Long requestId) throws Exception {
+        return fulfillRequest(requestId);
+    }
+
+    private PartRequest fulfillRequest(Long requestId) throws Exception {
         PartRequest request = partRequestRepository.findById(requestId)
                 .orElseThrow(() -> new Exception("Part request not found."));
 
@@ -48,33 +62,26 @@ public class PartRequestServiceImpl implements PartRequestService {
             throw new Exception("Insufficient stock for part: " + part.getPartName());
         }
 
-        // Deduct stock
         part.setCurrentStock(part.getCurrentStock() - request.getQuantity());
 
-        // Update part status if necessary
         if (part.getCurrentStock() == 0) {
-            part.setStatus(com.bytex.customercaresystem.model.PartStatus.OUT_OF_STOCK);
+            part.setStatus(PartStatus.OUT_OF_STOCK);
         } else if (part.getCurrentStock() < part.getMinimumStock()) {
-            part.setStatus(com.bytex.customercaresystem.model.PartStatus.LOW_STOCK);
+            part.setStatus(PartStatus.LOW_STOCK);
         }
         partRepository.save(part);
 
-        // Update ticket stage to notify technician
-        com.bytex.customercaresystem.model.Repair repair = request.getRepair();
-        if(repair != null) {
-            com.bytex.customercaresystem.model.Ticket ticket = repair.getTicket();
-            if (ticket != null) {
-                ticket.setStage(com.bytex.customercaresystem.model.TicketStage.WITH_TECHNICIAN); // Or a new 'PARTS_DELIVERED' stage
-                ticketRepository.save(ticket);
-            }
+        if(request.getRepair() != null && request.getRepair().getTicket() != null) {
+            request.getRepair().getTicket().setStage(TicketStage.WITH_TECHNICIAN);
         }
 
         request.setStatus(PartRequestStatus.FULFILLED);
-        request.setFulfillmentDate(java.time.LocalDateTime.now());
+        request.setFulfillmentDate(LocalDateTime.now());
         return partRequestRepository.save(request);
     }
 
     @Override
+    @Transactional
     public PartRequest rejectRequest(Long requestId) throws Exception {
         PartRequest request = partRequestRepository.findById(requestId)
                 .orElseThrow(() -> new Exception("Part request not found."));
@@ -83,69 +90,24 @@ public class PartRequestServiceImpl implements PartRequestService {
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public PartRequest forwardRequestToWarehouse(Long requestId) throws Exception {
         PartRequest request = partRequestRepository.findById(requestId)
                 .orElseThrow(() -> new Exception("Part request not found."));
-
-        // Update the ticket stage
-        com.bytex.customercaresystem.model.Repair repair = request.getRepair();
-        if (repair != null) {
-            com.bytex.customercaresystem.model.Ticket ticket = repair.getTicket();
-            if (ticket != null) {
-                ticket.setStage(com.bytex.customercaresystem.model.TicketStage.WAREHOUSE_REQUESTED);
-                ticketRepository.save(ticket);
-            }
+        if(request.getRepair() != null && request.getRepair().getTicket() != null) {
+            request.getRepair().getTicket().setStage(TicketStage.WAREHOUSE_REQUESTED);
         }
-
         request.setStatus(PartRequestStatus.PENDING_WAREHOUSE);
         return partRequestRepository.save(request);
     }
 
     @Override
-    public java.util.List<PartRequest> findWarehousePendingRequests() {
+    public List<PartRequest> findWarehousePendingRequests() {
         return partRequestRepository.findByStatusWithDetails(PartRequestStatus.PENDING_WAREHOUSE);
     }
 
     @Override
-    public java.util.Optional<PartRequest> findById(Long id) {
+    public Optional<PartRequest> findById(Long id) {
         return partRequestRepository.findById(id);
-    }
-
-    @Override
-    @org.springframework.transaction.annotation.Transactional
-    public PartRequest fulfillRequestFromWarehouse(Long requestId) throws Exception {
-        PartRequest request = partRequestRepository.findById(requestId)
-                .orElseThrow(() -> new Exception("Part request not found."));
-
-        Part part = request.getPart();
-        if (part.getCurrentStock() < request.getQuantity()) {
-            throw new Exception("Insufficient stock for part: " + part.getPartName());
-        }
-
-        // Deduct stock
-        part.setCurrentStock(part.getCurrentStock() - request.getQuantity());
-
-        // Update part status if necessary
-        if (part.getCurrentStock() == 0) {
-            part.setStatus(com.bytex.customercaresystem.model.PartStatus.OUT_OF_STOCK);
-        } else if (part.getCurrentStock() < part.getMinimumStock()) {
-            part.setStatus(com.bytex.customercaresystem.model.PartStatus.LOW_STOCK);
-        }
-        partRepository.save(part);
-
-        // Update ticket stage to notify technician
-        com.bytex.customercaresystem.model.Repair repair = request.getRepair();
-        if(repair != null) {
-            com.bytex.customercaresystem.model.Ticket ticket = repair.getTicket();
-            if (ticket != null) {
-                ticket.setStage(com.bytex.customercaresystem.model.TicketStage.WITH_TECHNICIAN);
-                ticketRepository.save(ticket);
-            }
-        }
-
-        request.setStatus(PartRequestStatus.FULFILLED);
-        request.setFulfillmentDate(java.time.LocalDateTime.now());
-        return partRequestRepository.save(request);
     }
 }

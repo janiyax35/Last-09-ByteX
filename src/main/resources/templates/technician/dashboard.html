@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
 <head th:replace="~{layouts/dashboard-layout :: head('Technician Dashboard')}"></head>
 <body>
 <div class="wrapper">
@@ -7,36 +7,34 @@
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <h1 class="h3 mb-2 text-light">My Repair Jobs</h1>
-            <p class="mb-4">This is a list of all technical repair jobs assigned to you.</p>
+            <h1 class="h3 mb-2 text-dark">My Repair Jobs</h1>
             <div class="card shadow mb-4">
-                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Assigned Repairs</h6></div>
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Assigned Tickets</h6></div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Repair ID</th><th>Ticket Subject</th><th>Customer</th><th>Status</th><th>Assigned Date</th><th>Action</th>
+                                    <th>Ticket ID</th>
+                                    <th>Subject</th>
+                                    <th>Customer</th>
+                                    <th>Repair Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:each="repair : ${repairs}">
-                                    <td th:text="${repair.repairId}">1</td>
-                                    <td th:text="${repair.ticket.subject}">PC is slow</td>
-                                    <td th:text="${repair.ticket.customer.fullName}">John Doe</td>
+                                    <td th:text="${repair.ticket.ticketId}"></td>
+                                    <td th:text="${repair.ticket.subject}"></td>
+                                    <td th:text="${repair.ticket.customer.fullName}"></td>
+                                    <td><span class="badge bg-warning" th:text="${repair.status}"></span></td>
                                     <td>
-                                        <span class="badge"
-                                              th:classappend="${#strings.contains(repair.status.name(), 'PENDING')} ? 'bg-secondary' :
-                                                             (${#strings.contains(repair.status.name(), 'PROGRESS')} ? 'bg-info' :
-                                                             (${#strings.contains(repair.status.name(), 'WAITING')} ? 'bg-warning' : 'bg-success'))"
-                                              th:text="${#strings.replace(repair.status.name(), '_', ' ')}">
-                                            STATUS
-                                        </span>
+                                        <a th:href="@{/technician/repairs/{id}(id=${repair.repairId})}" class="btn btn-info btn-sm">View Details</a>
                                     </td>
-                                    <td th:text="${#temporals.format(repair.startDate, 'yyyy-MM-dd HH:mm')}"></td>
-                                    <td><a th:href="@{/technician/repairs/{id}(id=${repair.repairId})}" class="btn btn-info btn-sm">View Details</a></td>
                                 </tr>
-                                <tr th:if="${#lists.isEmpty(repairs)}"><td colspan="6" class="text-center">You have no repair jobs assigned to you.</td></tr>
+                                <tr th:if="${#lists.isEmpty(repairs)}">
+                                    <td colspan="5" class="text-center">No repair jobs assigned to you.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

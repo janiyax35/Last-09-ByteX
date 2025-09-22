@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layouts/dashboard-layout :: head('Create Purchase Order')}"></head>
 <body>
 <div class="wrapper">
@@ -7,26 +7,42 @@
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <h1 class="h3 mb-2 text-light">Create New Purchase Order</h1>
-            <p class="mb-4">Select a supplier to begin creating a new purchase order.</p>
+            <h1 class="h3 mb-2 text-dark">Create Purchase Order</h1>
             <div class="card shadow mb-4">
-                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Step 1: Select Supplier</h6></div>
                 <div class="card-body">
-                    <form th:action="@{/warehouse/orders/new}" th:object="${purchaseOrder}" method="post">
+                    <form th:action="@{/warehouse/purchase-orders/new/{partRequestId}(partRequestId=${partRequest.id})}" th:object="${purchaseOrder}" method="post">
+                        <fieldset disabled>
+                            <div class="mb-3">
+                                <label class="form-label">Part Name</label>
+                                <input type="text" class="form-control" th:value="${partRequest.part.partName}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Quantity Requested</label>
+                                <input type="number" class="form-control" th:value="${partRequest.quantity}">
+                            </div>
+                        </fieldset>
+                        <hr>
                         <div class="mb-3">
                             <label for="supplier" class="form-label">Supplier</label>
-                            <select class="form-select" id="supplier" th:field="*{supplier}" required>
-                                <option value="">-- Select a Supplier --</option>
+                            <select id="supplier" name="supplierId" class="form-select" required>
+                                <option value="">Select a Supplier</option>
                                 <option th:each="s : ${suppliers}" th:value="${s.supplierId}" th:text="${s.supplierName}"></option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="vendorName" class="form-label">Vendor Name (for reference)</label>
+                            <input type="text" class="form-control" id="vendorName" th:field="*{vendorName}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="unitPrice" class="form-label">Unit Price</label>
+                            <input type="number" step="0.01" class="form-control" id="unitPrice" name="unitPrice" required>
                         </div>
                         <div class="mb-3">
                             <label for="expectedDelivery" class="form-label">Expected Delivery Date</label>
                             <input type="date" class="form-control" id="expectedDelivery" th:field="*{expectedDelivery}">
                         </div>
-                        <input type="hidden" th:field="*{totalAmount}" value="0.00" />
-                        <button type="submit" class="btn btn-primary">Create and Add Items</button>
-                        <a th:href="@{/warehouse/dashboard}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Purchase Order</button>
+                        <a th:href="@{/warehouse/stock-requests}" class="btn btn-secondary">Cancel</a>
                     </form>
                 </div>
             </div>

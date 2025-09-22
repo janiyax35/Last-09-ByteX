@@ -1,6 +1,5 @@
 package com.bytex.customercaresystem.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
@@ -8,13 +7,9 @@ import java.util.Objects;
 @Embeddable
 public class RepairPartId implements Serializable {
 
-    @Column(name = "repair_id")
     private Long repairId;
-
-    @Column(name = "part_id")
     private Long partId;
 
-    // Constructors
     public RepairPartId() {
     }
 
@@ -23,24 +18,12 @@ public class RepairPartId implements Serializable {
         this.partId = partId;
     }
 
-    // Getters and Setters
-    public Long getRepairId() {
-        return repairId;
-    }
+    // Getters, Setters, equals, hashCode
+    public Long getRepairId() { return repairId; }
+    public void setRepairId(Long repairId) { this.repairId = repairId; }
+    public Long getPartId() { return partId; }
+    public void setPartId(Long partId) { this.partId = partId; }
 
-    public void setRepairId(Long repairId) {
-        this.repairId = repairId;
-    }
-
-    public Long getPartId() {
-        return partId;
-    }
-
-    public void setPartId(Long partId) {
-        this.partId = partId;
-    }
-
-    // equals and hashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

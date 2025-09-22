@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
 <head th:replace="~{layouts/dashboard-layout :: head('Ticket Details')}"></head>
 <body>
 <div class="wrapper">
@@ -7,54 +7,54 @@
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-light" th:text="'Manage Ticket #' + ${ticket.ticketId}">Manage Ticket</h1>
-                <a th:href="@{/staff/dashboard}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                <h1 class="h3 mb-0 text-dark" th:text="'Manage Ticket #' + ${ticket.ticketId}"></h1>
+                <a th:href="@{/staff/my-tickets}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
             </div>
             <div class="row">
                 <div class="col-lg-7">
                     <div class="card shadow mb-4">
-                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary" th:text="${ticket.subject}">Ticket Subject</h6></div>
+                        <div class="card-header"><h6 class="m-0 font-weight-bold text-primary" th:text="${ticket.subject}"></h6></div>
                         <div class="card-body">
                             <p><strong>Customer:</strong> <span th:text="${ticket.customer.fullName}"></span></p>
-                            <p><strong>Status:</strong> <span class="badge bg-info" th:text="${#strings.replace(ticket.status.name(), '_', ' ')}"></span></p>
-                            <p th:if="${ticket.stage != null}"><strong>Stage:</strong>
-                                <span class="badge bg-warning" th:text="${ticket.stage.displayName}"></span>
-                            </p>
-                            <p><strong>Priority:</strong> <span th:text="${ticket.priority.name()}"></span></p>
+                            <p><strong>Status:</strong> <span class="badge bg-primary" th:text="${ticket.status}"></span></p>
+                            <p><strong>Stage:</strong> <span class="badge bg-info" th:text="${ticket.stage?.displayName}"></span></p>
+                            <p><strong>Priority:</strong> <span class="badge bg-secondary" th:text="${ticket.priority}"></span></p>
                             <div th:if="${!#lists.isEmpty(ticket.repairs)}">
                                 <hr>
                                 <p><strong>Assigned Technician:</strong> <strong th:text="${ticket.repairs[0].technician.fullName}"></strong></p>
-                                <p><strong>Diagnosis:</strong> <span th:text="${ticket.repairs[0].diagnosis}"></span></p>
                             </div>
                             <hr>
-                            <p><strong>Description:</strong> <span th:text="${ticket.description}"></span></p>
+                            <p><strong>Description:</strong></p>
+                            <p th:text="${ticket.description}"></p>
                         </div>
                     </div>
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Conversation History</h6></div>
+                    <div class="card shadow mb-4" th:if="${!#lists.isEmpty(ticket.repairs) and !#lists.isEmpty(ticket.repairs[0].partRequests)}">
+                        <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Requested Parts Status</h6></div>
                         <div class="card-body">
-                            <div th:each="response : ${ticket.responses}" class="mb-3 border-bottom pb-3">
-                                 <strong><i class="fas fa-user"></i> <span th:text="${response.user.fullName}"></span></strong>:
-                                 <p class="mt-1" th:text="${response.message}"></p>
-                            </div>
+                           <ul class="list-group">
+                                <li th:each="req : ${ticket.repairs[0].partRequests}" class="list-group-item d-flex justify-content-between">
+                                    <span th:text="${req.part.partName} + ' (Qty: ' + ${req.quantity} + ')'"></span>
+                                    <span class="badge bg-warning" th:text="${req.status}"></span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-5">
                     <div class="card shadow mb-4">
-                         <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Add Reply</h6></div>
+                         <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Add Reply to Customer</h6></div>
                          <div class="card-body">
-                             <form th:action="@{/staff/tickets/{id}/reply(id=${ticket.ticketId})}" th:object="${newResponse}" method="post">
-                                 <textarea class="form-control" rows="4" th:field="*{message}" placeholder="Type your response..."></textarea>
+                             <form th:action="@{/staff/tickets/{id}/reply(id=${ticket.ticketId})}" method="post">
+                                 <textarea name="message" class="form-control" rows="4" placeholder="Type your response..."></textarea>
                                  <button type="submit" class="btn btn-primary mt-2">Post Reply</button>
                              </form>
                          </div>
                     </div>
                     <div class="card shadow mb-4">
-                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Update Status</h6></div>
+                        <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Update Ticket Status</h6></div>
                         <div class="card-body">
                             <form th:action="@{/staff/tickets/{id}/status(id=${ticket.ticketId})}" method="post">
                                 <select name="status" class="form-select">
@@ -64,60 +64,25 @@
                             </form>
                         </div>
                     </div>
-                    <div sec:authorize="hasAuthority('ROLE_ADMIN')">
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Re-Assign Staff</h6></div>
-                            <div class="card-body">
-                                <form th:action="@{/admin/tickets/{id}/assign-staff(id=${ticket.ticketId})}" method="post">
-                                     <div class="mb-2">
-                                        <label>Staff Member:</label>
-                                        <select name="staffId" class="form-select">
-                                            <option th:each="staff : ${staffMembers}" th:value="${staff.userId}" th:text="${staff.fullName}" th:selected="${ticket.assignedTo != null && ticket.assignedTo.userId == staff.userId}"></option>
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Assign Staff</button>
-                                </form>
-                            </div>
-                        </div>
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Assign/Escalate to Technician</h6></div>
-                            <div class="card-body">
-                                <form th:action="@{/staff/tickets/{id}/escalate(id=${ticket.ticketId})}" method="post">
-                                    <div class="mb-2">
-                                        <label>Technician:</label>
-                                        <select name="technicianId" class="form-select">
-                                            <option value="">Select a Technician</option>
-                                            <option th:each="tech : ${technicians}" th:value="${tech.userId}" th:text="${tech.fullName}"></option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label>Initial Diagnosis:</label>
-                                        <textarea name="diagnosis" class="form-control" rows="3" placeholder="Describe the technical issue..."></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-warning">Assign to Technician</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                     <div class="card shadow mb-4" th:if="${!#lists.isEmpty(ticket.repairs)}">
-                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Requested Parts Status</h6></div>
+                    <div class="card shadow mb-4" sec:authorize="hasAuthority('ROLE_ADMIN')">
+                        <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Admin Actions</h6></div>
                         <div class="card-body">
-                            <div th:each="repair : ${ticket.repairs}">
-                                <ul class="list-group" th:if="${!#lists.isEmpty(repair.partRequests)}">
-                                    <li th:each="req : ${repair.partRequests}" class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span th:text="${req.part.partName} + ' (Qty: ' + ${req.quantity} + ')'"></span>
-                                        <span class="badge" th:classappend="${req.status.name() == 'PENDING' || req.status.name() == 'PENDING_WAREHOUSE'} ? 'bg-warning' : (${req.status.name() == 'FULFILLED'} ? 'bg-success' : 'bg-danger')" th:text="${#strings.replace(req.status.name(), '_', ' ')}"></span>
-                                    </li>
-                                </ul>
-                                <p th:if="${#lists.isEmpty(repair.partRequests)}" class="text-muted">No parts have been requested for this repair.</p>
-                            </div>
-                        </div>
-                    </div>
-                     <div class="card shadow mb-4">
-                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Archive Ticket</h6></div>
-                        <div class="card-body">
-                            <p>Once a ticket is resolved and closed, you can archive it to remove it from active lists.</p>
-                            <a th:href="@{/staff/tickets/{id}/archive(id=${ticket.ticketId})}" class="btn btn-secondary">Archive this Ticket</a>
+                             <form th:action="@{/staff/tickets/{id}/escalate(id=${ticket.ticketId})}" method="post">
+                                <label>Assign/Escalate to Technician</label>
+                                <select name="technicianId" class="form-select mb-2">
+                                    <option th:each="tech : ${technicians}" th:value="${tech.userId}" th:text="${tech.fullName}"></option>
+                                </select>
+                                <textarea name="diagnosis" class="form-control mb-2" rows="2" placeholder="Initial diagnosis..."></textarea>
+                                <button type="submit" class="btn btn-warning">Assign Technician</button>
+                            </form>
+                            <hr>
+                            <form th:action="@{/admin/tickets/{id}/assign-staff(id=${ticket.ticketId})}" method="post">
+                                <label>Re-Assign Staff</label>
+                                <select name="staffId" class="form-select mb-2">
+                                    <option th:each="st : ${staffMembers}" th:value="${st.userId}" th:text="${st.fullName}" th:selected="${ticket.assignedTo != null && ticket.assignedTo.userId == st.userId}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-primary">Assign Staff</button>
+                            </form>
                         </div>
                     </div>
                 </div>

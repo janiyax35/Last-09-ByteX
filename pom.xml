@@ -12,7 +12,7 @@
     <artifactId>customercaresystem</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ByteX-Customer-Care-System</name>
-    <description>A web-based customer care system for ByteX PC part shop.</description>
+    <description>A web-based customer care system for a PC parts shop.</description>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -50,7 +50,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Utilities -->
+        <!-- Developer Tools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -76,10 +76,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>

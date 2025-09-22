@@ -1,82 +1,48 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{layouts/dashboard-layout :: head('Purchase Order Details')}"></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layouts/dashboard-layout :: head('PO Details')}"></head>
 <body>
 <div class="wrapper">
     <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <h1 class="h3 mb-2 text-light" th:text="'Purchase Order #' + ${purchaseOrder.orderId}">PO Details</h1>
-            <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card shadow mb-4">
-                        <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Order Details</h6></div>
-                        <div class="card-body">
-                            <p><strong>Supplier:</strong> <span th:text="${purchaseOrder.supplier.supplierName}"></span></p>
-                            <p><strong>Status:</strong> <span class="badge bg-info" th:text="${purchaseOrder.status.name()}"></span></p>
-                            <p><strong>Total Amount:</strong> <span th:text="${'$' + #numbers.formatDecimal(purchaseOrder.totalAmount, 1, 2)}"></span></p>
-                            <p><strong>Order Date:</strong> <span th:text="${#temporals.format(purchaseOrder.orderDate, 'yyyy-MM-dd')}"></span></p>
+            <h1 class="h3 mb-2 text-dark" th:text="'Purchase Order #' + ${purchaseOrder.orderId}"></h1>
+             <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+            <div class="card shadow mb-4">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Order Details</h6></div>
+                <div class="card-body">
+                    <p><strong>Supplier:</strong> <span th:text="${purchaseOrder.supplier.supplierName}"></span></p>
+                    <p><strong>Total:</strong> <span th:text="'$' + ${#numbers.formatDecimal(purchaseOrder.totalAmount, 1, 2)}"></span></p>
+                    <p><strong>Order Date:</strong> <span th:text="${#temporals.format(purchaseOrder.orderDate, 'yyyy-MM-dd')}"></span></p>
+                    <hr>
+                    <form th:action="@{/warehouse/orders/{id}/status(id=${purchaseOrder.orderId})}" method="post">
+                        <label class="form-label">Update Status:</label>
+                        <div class="input-group">
+                            <select name="status" class="form-select">
+                                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == purchaseOrder.status}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-info">Update</button>
                         </div>
-                    </div>
-                    <div class="card shadow mb-4">
-                         <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Order Items</h6></div>
-                         <div class="card-body">
-                             <table class="table">
-                                 <thead><tr><th>Part</th><th>Quantity</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
-                                 <tbody>
-                                     <tr th:each="item : ${purchaseOrder.orderItems}">
-                                         <td th:text="${item.part.partName}"></td>
-                                         <td th:text="${item.quantity}"></td>
-                                         <td th:text="${'$' + #numbers.formatDecimal(item.unitPrice, 1, 2)}"></td>
-                                         <td th:text="${'$' + #numbers.formatDecimal(item.unitPrice * item.quantity, 1, 2)}"></td>
-                                     </tr>
-                                     <tr th:if="${#lists.isEmpty(purchaseOrder.orderItems)}"><td colspan="4" class="text-center">No items added to this order yet.</td></tr>
-                                 </tbody>
-                             </table>
-                         </div>
-                    </div>
+                    </form>
                 </div>
-                <div class="col-lg-4">
-                    <div class="card shadow mb-4">
-                        <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Actions</h6></div>
-                        <div class="card-body">
-                            <form th:action="@{/warehouse/orders/{id}/status(id=${purchaseOrder.orderId})}" method="post" class="mb-3">
-                                <label class="form-label">Update Status:</label>
-                                <div class="input-group">
-                                    <select name="status" class="form-select">
-                                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.name()}" th:selected="${s == purchaseOrder.status}"></option>
-                                    </select>
-                                    <button type="submit" class="btn btn-info">Update</button>
-                                </div>
-                            </form>
-                            <hr>
-                            <div th:if="${purchaseOrder.status.name() == 'PENDING'}">
-                                 <a th:href="@{/warehouse/orders/{id}/cancel(id=${purchaseOrder.orderId})}" class="btn btn-danger w-100"
-                                    onclick="return confirm('Are you sure you want to cancel this order?');">
-                                     Cancel Purchase Order
-                                 </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card shadow mb-4">
-                         <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Add Item to Order</h6></div>
-                         <div class="card-body">
-                             <form th:action="@{/warehouse/orders/{id}/items(id=${purchaseOrder.orderId})}" th:object="${newOrderItem}" method="post">
-                                 <div class="mb-2"><label>Part:</label>
-                                     <select class="form-select" name="partId" required>
-                                         <option th:each="p : ${parts}" th:value="${p.partId}" th:text="${p.partName}"></option>
-                                     </select>
-                                 </div>
-                                 <div class="mb-2"><label>Quantity:</label><input type="number" class="form-control" th:field="*{quantity}" required></div>
-                                 <div class="mb-2"><label>Unit Price:</label><input type="number" step="0.01" class="form-control" th:field="*{unitPrice}" required></div>
-                                 <button type="submit" class="btn btn-primary">Add Item</button>
-                             </form>
-                         </div>
-                    </div>
-                </div>
+            </div>
+            <div class="card shadow mb-4">
+                 <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Order Items</h6></div>
+                 <div class="card-body">
+                     <table class="table">
+                         <thead><tr><th>Part</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
+                         <tbody>
+                             <tr th:each="item : ${purchaseOrder.orderItems}">
+                                 <td th:text="${item.part.partName}"></td>
+                                 <td th:text="${item.quantity}"></td>
+                                 <td th:text="'$' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}"></td>
+                                 <td th:text="'$' + ${#numbers.formatDecimal(item.unitPrice * item.quantity, 1, 2)}"></td>
+                             </tr>
+                         </tbody>
+                     </table>
+                 </div>
             </div>
         </div>
     </div>

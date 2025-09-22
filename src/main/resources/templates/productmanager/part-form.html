@@ -1,57 +1,48 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{layouts/dashboard-layout :: head(${pageTitle})}"></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layouts/dashboard-layout :: head(${part.partId == null ? 'New Part' : 'Edit Part'})}"></head>
 <body>
 <div class="wrapper">
     <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
     <div id="content">
         <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
         <div class="container-fluid">
-            <h1 class="h3 mb-2 text-light" th:text="${pageTitle}">Add/Edit Part</h1>
+            <h1 class="h3 mb-2 text-dark" th:text="${part.partId == null ? 'Add New Part' : 'Edit Part'}"></h1>
             <div class="card shadow mb-4">
-                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Part Details</h6></div>
                 <div class="card-body">
                     <form th:action="@{/productmanager/parts/add}" th:object="${part}" method="post">
                         <input type="hidden" th:field="*{partId}" />
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="partName" class="form-label">Part Name</label>
-                                <input type="text" class="form-control" th:field="*{partName}" required>
+                                <input type="text" class="form-control" id="partName" th:field="*{partName}" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="partNumber" class="form-label">Part Number</label>
-                                <input type="text" class="form-control" th:field="*{partNumber}" required>
+                                <input type="text" class="form-control" id="partNumber" th:field="*{partNumber}" required>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <input type="text" class="form-control" id="category" th:field="*{category}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="currentStock" class="form-label">Current Stock</label>
+                                <input type="number" class="form-control" id="currentStock" th:field="*{currentStock}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="minimumStock" class="form-label">Minimum Stock</label>
+                                <input type="number" class="form-control" id="minimumStock" th:field="*{minimumStock}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="unitPrice" class="form-label">Unit Price</label>
+                            <input type="number" step="0.01" class="form-control" id="unitPrice" th:field="*{unitPrice}" required>
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" rows="3" th:field="*{description}"></textarea>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="category" class="form-label">Category</label>
-                                <input type="text" class="form-control" th:field="*{category}" required>
-                            </div>
-                             <div class="col-md-6 mb-3">
-                                <label for="unitPrice" class="form-label">Unit Price</label>
-                                <input type="number" step="0.01" class="form-control" th:field="*{unitPrice}" required>
-                            </div>
-                        </div>
-                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="currentStock" class="form-label">Current Stock</label>
-                                <input type="number" class="form-control" th:field="*{currentStock}" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="minimumStock" class="form-label">Minimum Stock Level</label>
-                                <input type="number" class="form-control" th:field="*{minimumStock}" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" th:field="*{status}" required>
-                                <option th:each="s : ${T(com.bytex.customercaresystem.model.PartStatus).values()}" th:value="${s}" th:text="${s.name()}"></option>
-                            </select>
+                            <textarea class="form-control" id="description" th:field="*{description}" rows="4"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Save Part</button>
                         <a th:href="@{/productmanager/parts}" class="btn btn-secondary">Cancel</a>

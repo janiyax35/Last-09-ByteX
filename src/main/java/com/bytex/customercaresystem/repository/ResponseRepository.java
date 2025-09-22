@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ResponseRepository extends JpaRepository<Response, Long> {
-    // Basic CRUD methods are inherited from JpaRepository
 }

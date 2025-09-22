@@ -2,9 +2,9 @@ package com.bytex.customercaresystem.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -24,14 +24,18 @@ public class PurchaseOrder {
     @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
 
+    @Column(nullable = false)
+    private String vendorName;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private PurchaseOrderStatus status = PurchaseOrderStatus.PENDING;
 
     @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime orderDate;
 
     private LocalDateTime expectedDelivery;
@@ -39,86 +43,30 @@ public class PurchaseOrder {
     private LocalDateTime actualDelivery;
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<OrderItem> orderItems;
-
-    // Constructors
-    public PurchaseOrder() {
-    }
+    private Set<OrderItem> orderItems = new HashSet<>();
 
     // Getters and Setters
-    public Long getOrderId() {
-        return orderId;
-    }
+    public Long getOrderId() { return orderId; }
+    public void setOrderId(Long orderId) { this.orderId = orderId; }
+    public User getCreatedBy() { return createdBy; }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
+    public Supplier getSupplier() { return supplier; }
+    public void setSupplier(Supplier supplier) { this.supplier = supplier; }
+    public String getVendorName() { return vendorName; }
+    public void setVendorName(String vendorName) { this.vendorName = vendorName; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+    public PurchaseOrderStatus getStatus() { return status; }
+    public void setStatus(PurchaseOrderStatus status) { this.status = status; }
+    public LocalDateTime getOrderDate() { return orderDate; }
+    public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
+    public LocalDateTime getExpectedDelivery() { return expectedDelivery; }
+    public void setExpectedDelivery(LocalDateTime expectedDelivery) { this.expectedDelivery = expectedDelivery; }
+    public LocalDateTime getActualDelivery() { return actualDelivery; }
+    public void setActualDelivery(LocalDateTime actualDelivery) { this.actualDelivery = actualDelivery; }
+    public Set<OrderItem> getOrderItems() { return orderItems; }
+    public void setOrderItems(Set<OrderItem> orderItems) { this.orderItems = orderItems; }
 
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-
-    public User getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Supplier getSupplier() {
-        return supplier;
-    }
-
-    public void setSupplier(Supplier supplier) {
-        this.supplier = supplier;
-    }
-
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(BigDecimal totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-
-    public PurchaseOrderStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(PurchaseOrderStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public LocalDateTime getExpectedDelivery() {
-        return expectedDelivery;
-    }
-
-    public void setExpectedDelivery(LocalDateTime expectedDelivery) {
-        this.expectedDelivery = expectedDelivery;
-    }
-
-    public LocalDateTime getActualDelivery() {
-        return actualDelivery;
-    }
-
-    public void setActualDelivery(LocalDateTime actualDelivery) {
-        this.actualDelivery = actualDelivery;
-    }
-
-    public Set<OrderItem> getOrderItems() {
-        return orderItems;
-    }
-
-    public void setOrderItems(Set<OrderItem> orderItems) {
-        this.orderItems = orderItems;
-    }
-
-    // equals, hashCode, toString
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -130,14 +78,5 @@ public class PurchaseOrder {
     @Override
     public int hashCode() {
         return Objects.hash(orderId);
-    }
-
-    @Override
-    public String toString() {
-        return "PurchaseOrder{" +
-                "orderId=" + orderId +
-                ", status=" + status +
-                ", totalAmount=" + totalAmount +
-                '}';
     }
 }
