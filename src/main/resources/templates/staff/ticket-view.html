@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{staff/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>View Ticket</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2" th:text="'Ticket #' + ${ticket.id}">Ticket Details</h1>
+        <a th:href="@{/staff/dashboard}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+    <div class="row">
+        <!-- Left Column: Ticket Info & Actions -->
+        <div class="col-lg-8">
+            <!-- Ticket Details -->
+            <div class="card mb-4" data-aos="fade-right">
+                <div class="card-header" th:text="${ticket.subject}">PC Keeps Crashing</div>
+                <div class="card-body">
+                    <p class="card-text" th:text="${ticket.description}">Description of the issue.</p>
+                    <hr>
+                    <p><strong>Customer:</strong> <span th:text="${ticket.customer.fullName}"></span></p>
+                    <p><strong>Email:</strong> <span th:text="${ticket.customer.email}"></span></p>
+                </div>
+            </div>
+
+            <!-- Respond Form -->
+            <div class="card mb-4" data-aos="fade-up">
+                <div class="card-header">Respond to Customer</div>
+                <div class="card-body">
+                    <form th:action="@{/staff/tickets/respond/{id}(id=${ticket.id})}" method="post">
+                        <div class="mb-3">
+                            <textarea name="message" class="form-control" rows="3" placeholder="Enter your response..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Response</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Conversation History -->
+            <div class="card" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header">Conversation History</div>
+                <div class="card-body">
+                    <div th:each="response : ${ticket.responses}" class="d-flex mb-3">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-user-circle fa-2x" th:classappend="${response.user.role.name() == 'CUSTOMER'} ? 'text-primary' : 'text-success'"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mt-0" th:text="${response.user.fullName}">User Name</h6>
+                            <p th:text="${response.message}">Message content.</p>
+                            <small class="text-muted" th:text="${#temporals.format(response.createdAt, 'MMM dd, yyyy HH:mm')}"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Status & Escalation -->
+        <div class="col-lg-4">
+            <div class="card" data-aos="fade-left">
+                <div class="card-header">Manage Ticket</div>
+                <div class="card-body">
+                    <!-- Update Status -->
+                    <form th:action="@{/staff/tickets/update-status/{id}(id=${ticket.id})}" method="post" class="mb-3">
+                        <label for="status" class="form-label"><strong>Update Status</strong></label>
+                        <div class="input-group">
+                            <select id="status" name="status" class="form-select">
+                                <option th:each="s : ${T(com.bytex.customercaresystem.models.enums.TicketStatus).values()}"
+                                        th:value="${s}" th:text="${s.name().replace('_', ' ')}" th:selected="${s == ticket.status}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-secondary">Update</button>
+                        </div>
+                    </form>
+                    <hr>
+                    <!-- Escalate & Archive -->
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#escalateModal">
+                            <i class="fas fa-level-up-alt"></i> Escalate to Technician
+                        </button>
+                        <a th:href="@{/staff/tickets/archive/{id}(id=${ticket.id})}" class="btn btn-outline-secondary"
+                           th:classappend="${ticket.status.name() != 'RESOLVED' && ticket.status.name() != 'CLOSED'} ? 'disabled' : ''"
+                           onclick="return confirm('Are you sure you want to archive this ticket?');">
+                           <i class="fas fa-archive"></i> Archive Ticket
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Escalate Modal -->
+    <div class="modal fade" id="escalateModal" tabindex="-1" aria-labelledby="escalateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/staff/tickets/escalate/{id}(id=${ticket.id})}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="escalateModalLabel">Escalate Ticket</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="technicianId" class="form-label">Assign to Technician</label>
+                            <select id="technicianId" name="technicianId" class="form-select" required>
+                                <option value="">-- Select a Technician --</option>
+                                <option th:each="tech : ${technicians}" th:value="${tech.id}" th:text="${tech.fullName}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="diagnosis" class="form-label">Initial Diagnosis</label>
+                            <textarea id="diagnosis" name="diagnosis" class="form-control" rows="3" required placeholder="Provide a brief summary of the issue for the technician."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Escalate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

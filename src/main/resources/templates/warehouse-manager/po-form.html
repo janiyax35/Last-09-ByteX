@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{warehouse-manager/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Purchase Order Form</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Create Purchase Order</h1>
+    </div>
+
+    <div class="card" data-aos="fade-up">
+        <div class="card-body">
+            <form th:action="@{/warehouse-manager/purchase-orders/new}" th:object="${purchaseOrder}" method="post" id="po-form">
+
+                <!-- General PO Info -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="supplier" class="form-label">Supplier</label>
+                        <select class="form-select" th:field="*{supplier.id}" required>
+                            <option value="">-- Select a Supplier --</option>
+                            <option th:each="s : ${suppliers}" th:value="${s.id}" th:text="${s.name}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="totalAmount" class="form-label">Total Amount ($)</label>
+                        <input type="number" step="0.01" class="form-control" th:field="*{totalAmount}" required>
+                    </div>
+                </div>
+                <hr>
+
+                <!-- Order Items -->
+                <h4>Order Items</h4>
+                <div id="order-items-container">
+                    <div th:each="item, itemStat : *{orderItems}" class="row order-item-row mb-2 align-items-center">
+                        <div class="col-md-5">
+                            <label class="form-label">Part</label>
+                            <select class="form-select" th:field="*{orderItems[__${itemStat.index}__].part.id}" required>
+                                 <option value="">-- Select Part --</option>
+                                <option th:each="p : ${parts}" th:value="${p.id}" th:text="${p.partName}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control" th:field="*{orderItems[__${itemStat.index}__].quantity}" required min="1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Unit Price</label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{orderItems[__${itemStat.index}__].unitPrice}" required>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="button" class="btn btn-danger btn-sm w-100" onclick="removeRow(this)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="add-item-btn" class="btn btn-sm btn-success mt-2">
+                    <i class="fas fa-plus"></i> Add Another Item
+                </button>
+
+                <hr>
+                <button type="submit" class="btn btn-primary">Create Purchase Order</button>
+                <a th:href="@{/warehouse-manager/purchase-orders}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript for adding/removing rows -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const partsOptions = /*[[${parts}]]*/ [];
+        let itemIndex = /*[[${#lists.size(purchaseOrder.orderItems)}]]*/ 1;
+
+        document.getElementById('add-item-btn').addEventListener('click', function() {
+            const container = document.getElementById('order-items-container');
+            const newRow = document.createElement('div');
+            newRow.classList.add('row', 'order-item-row', 'mb-2', 'align-items-center');
+
+            let optionsHtml = '<option value="">-- Select Part --</option>';
+            partsOptions.forEach(part => {
+                optionsHtml += `<option value="${part.id}">${part.partName}</option>`;
+            });
+
+            newRow.innerHTML = `
+                <div class="col-md-5">
+                    <label class="form-label">Part</label>
+                    <select class="form-select" name="orderItems[${itemIndex}].part.id" required>
+                        ${optionsHtml}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" class="form-control" name="orderItems[${itemIndex}].quantity" required min="1">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Unit Price</label>
+                    <input type="number" step="0.01" class="form-control" name="orderItems[${itemIndex}].unitPrice" required>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn btn-danger btn-sm w-100" onclick="removeRow(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(newRow);
+            itemIndex++;
+        });
+
+        function removeRow(button) {
+            button.closest('.order-item-row').remove();
+        }
+        /*]]>*/
+    </script>
+</div>
+</body>
+</html>

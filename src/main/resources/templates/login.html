@@ -1,41 +1,50 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/header :: head('Login')}"></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{main-layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Login - ByteX</title>
+</head>
 <body>
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Login to ByteX</h3>
+<div th:fragment="content">
+    <div class="container">
+        <div class="auth-container card" data-aos="zoom-in">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Login to ByteX</h3>
+
+                <!-- Login Error Message -->
+                <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                    Invalid username/email or password.
                 </div>
-                <div class="card-body">
-                    <div th:if="${param.error}" class="alert alert-danger">
-                        Invalid username or password.
+
+                <!-- Logout Success Message -->
+                <div th:if="${param.logout}" class="alert alert-success" role="alert">
+                    You have been logged out.
+                </div>
+
+                <!-- Registration Success Message -->
+                <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}">
+                </div>
+
+                <form th:action="@{/login}" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username or Email</label>
+                        <input type="text" class="form-control" id="username" name="username" required autofocus>
                     </div>
-                    <div th:if="${param.logout}" class="alert alert-success">
-                        You have been logged out.
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
                     </div>
-                    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-                    <form th:action="@{/login}" method="post">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username or Email</label>
-                            <input type="text" id="username" name="username" class="form-control" required autofocus>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" name="password" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
-                    </form>
-                    <div class="mt-3 text-center">
-                        <span>Don't have an account? </span><a th:href="@{/signup}">Sign up here</a>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
                     </div>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Don't have an account? <a th:href="@{/signup}">Sign Up</a></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div th:replace="~{fragments/footer :: scripts}"></div>
 </body>
 </html>

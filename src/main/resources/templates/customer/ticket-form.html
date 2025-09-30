@@ -1,42 +1,59 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layouts/dashboard-layout :: head(${ticket.ticketId == null ? 'New Ticket' : 'Edit Ticket'})}"></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{customer/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Ticket Form</title>
+</head>
 <body>
-<div class="wrapper">
-    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
-    <div id="content">
-        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
-        <div class="container-fluid">
-            <h1 class="h3 mb-2 text-dark" th:text="${ticket.ticketId == null ? 'Create New Support Ticket' : 'Edit Ticket'}"></h1>
-            <div class="card shadow mb-4">
-                <div class="card-body">
-                    <form th:action="${ticket.ticketId == null} ? @{/customer/tickets/new} : @{/customer/tickets/{id}/edit(id=${ticket.ticketId})}"
-                          th:object="${ticket}" method="post">
-                        <input type="hidden" th:field="*{ticketId}" />
-                        <div class="mb-3">
-                            <label for="subject" class="form-label">Subject</label>
-                            <input type="text" class="form-control" id="subject" th:field="*{subject}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="priority" class="form-label">Priority</label>
-                            <select id="priority" class="form-select" th:field="*{priority}">
-                                <option th:each="p : ${T(com.bytex.customercaresystem.model.TicketPriority).values()}"
-                                        th:value="${p}" th:text="${p}"></option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" th:field="*{description}" rows="8" required
-                                      placeholder="Please describe your issue in detail."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Ticket</button>
-                        <a th:href="@{/customer/dashboard}" class="btn btn-secondary">Cancel</a>
-                    </form>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2" th:text="${ticket.id == null} ? 'Create New Ticket' : 'Edit Ticket'">Ticket Form</h1>
+    </div>
+
+    <div class="card" data-aos="fade-up">
+        <div class="card-body">
+            <form th:action="${ticket.id == null} ? @{/customer/tickets/new} : @{/customer/tickets/edit/{id}(id=${ticket.id})}"
+                  th:object="${ticket}" method="post">
+
+                <input type="hidden" th:field="*{id}" />
+
+                <div class="mb-3">
+                    <label for="subject" class="form-label">Subject</label>
+                    <input type="text" class="form-control" th:field="*{subject}" required>
                 </div>
-            </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" th:field="*{description}" rows="5" required></textarea>
+                     <small class="form-text text-muted">Please provide as much detail as possible about your issue.</small>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" th:field="*{category}">
+                            <option value="Hardware">Hardware Issue</option>
+                            <option value="Software">Software Problem</option>
+                            <option value="Networking">Networking Issue</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select class="form-select" th:field="*{priority}">
+                            <option th:each="p : ${T(com.bytex.customercaresystem.models.enums.TicketPriority).values()}"
+                                    th:value="${p}" th:text="${p.name().replace('_', ' ')}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr>
+
+                <button type="submit" class="btn btn-primary" th:text="${ticket.id == null} ? 'Submit Ticket' : 'Save Changes'">Submit</button>
+                <a th:href="@{/customer/tickets}" class="btn btn-secondary">Cancel</a>
+            </form>
         </div>
     </div>
 </div>
-<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
 </body>
 </html>
