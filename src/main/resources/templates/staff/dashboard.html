@@ -1,52 +1,108 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
-<head th:replace="~{layouts/dashboard-layout :: head('Staff Dashboard')}"></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{staff/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Staff Dashboard</title>
+</head>
 <body>
-<div class="wrapper">
-    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
-    <div id="content">
-        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
-        <div class="container-fluid">
-            <h1 class="h3 mb-2 text-dark">Staff Dashboard</h1>
-            <p class="mb-4">View and accept new tickets from the queue.</p>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Staff Dashboard</h1>
+    </div>
 
-            <div class="card shadow mb-4">
-                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Unassigned Ticket Queue</h6></div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Subject</th>
-                                    <th>Customer</th>
-                                    <th>Priority</th>
-                                    <th>Created</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="ticket : ${unassignedTickets}">
-                                    <td th:text="${ticket.ticketId}"></td>
-                                    <td th:text="${ticket.subject}"></td>
-                                    <td th:text="${ticket.customer.fullName}"></td>
-                                    <td th:text="${ticket.priority}"></td>
-                                    <td th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
-                                    <td>
-                                        <a th:href="@{/staff/tickets/{id}/accept(id=${ticket.ticketId})}" class="btn btn-success btn-sm">Accept</a>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(unassignedTickets)}">
-                                    <td colspan="6" class="text-center">No unassigned tickets. Great job!</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${param.error == 'not_assigned'}" class="alert alert-danger" role="alert">
+        You can only view tickets that are assigned to you.
+    </div>
+
+    <!-- Unassigned Tickets -->
+    <div class="card mb-4" data-aos="fade-up">
+        <div class="card-header">
+            <i class="fas fa-inbox"></i> Unassigned Tickets
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject</th>
+                        <th>Customer</th>
+                        <th>Priority</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ticket : ${unassignedTickets}">
+                        <td th:text="${ticket.id}">1</td>
+                        <td th:text="${ticket.subject}">PC not working</td>
+                        <td th:text="${ticket.customer.fullName}">John Doe</td>
+                        <td th:text="${ticket.priority.name().replace('_', ' ')}">High</td>
+                        <td>
+                            <a th:href="@{/staff/tickets/accept/{id}(id=${ticket.id})}" class="btn btn-sm btn-success">
+                                <i class="fas fa-check"></i> Accept
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(unassignedTickets)}">
+                        <td colspan="5" class="text-center">No unassigned tickets available.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Tickets -->
+    <div class="card" data-aos="fade-up" data-aos-delay="100">
+        <div class="card-header">
+            <i class="fas fa-user-tag"></i> My Assigned Tickets
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ticket : ${myTickets}" th:classappend="${ticket.archived} ? 'table-light text-muted' : ''">
+                        <td th:text="${ticket.id}">2</td>
+                        <td th:text="${ticket.subject}">Software issue</td>
+                        <td th:text="${ticket.customer.fullName}">Jane Smith</td>
+                        <td>
+                             <span class="badge"
+                                   th:classappend="${#strings.toString(ticket.status) == 'OPEN'} ? 'bg-danger' :
+                                                  (${#strings.toString(ticket.status) == 'IN_PROGRESS'} ? 'bg-warning text-dark' :
+                                                  (${#strings.toString(ticket.status) == 'RESOLVED'} ? 'bg-success' :
+                                                  (${#strings.toString(ticket.status) == 'CLOSED'} ? 'bg-secondary' : 'bg-info text-dark')))"
+                                   th:text="${ticket.status.name().replace('_', ' ')}">
+                                 IN_PROGRESS
+                             </span>
+                        </td>
+                        <td th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}">2023-10-27 11:00</td>
+                        <td>
+                            <a th:href="@{/staff/tickets/view/{id}(id=${ticket.id})}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(myTickets)}">
+                        <td colspan="6" class="text-center">You have no tickets assigned to you.</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
 </body>
 </html>

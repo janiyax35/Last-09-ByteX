@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{customer/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>View Ticket</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Ticket Details</h1>
+        <a th:href="@{/customer/tickets}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to My Tickets
+        </a>
+    </div>
+
+    <!-- Error Messages for locked edits -->
+    <div th:if="${param.error == 'edit_locked'}" class="alert alert-warning" role="alert">
+        This ticket cannot be edited because it is already being processed by our team.
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Ticket Info -->
+        <div class="col-lg-8">
+            <div class="card mb-4" data-aos="fade-right">
+                <div class="card-header d-flex justify-content-between">
+                    <span th:text="'Ticket #' + ${ticket.id}">Ticket #1</span>
+                    <th:block th:if="${ticket.assignedTo == null}">
+                         <a th:href="@{/customer/tickets/edit/{id}(id=${ticket.id})}" class="btn btn-sm btn-outline-light">
+                             <i class="fas fa-edit"></i> Edit Ticket
+                         </a>
+                    </th:block>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title" th:text="${ticket.subject}">PC Keeps Crashing</h4>
+                    <p class="card-text" th:text="${ticket.description}">
+                        Every time I try to play a game, my computer restarts after about 5 minutes.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Conversation History -->
+            <div class="card" data-aos="fade-up">
+                <div class="card-header">
+                    Conversation History
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(ticket.responses)}" class="text-center text-muted p-3">
+                        <p>No responses yet. Our team will get back to you shortly.</p>
+                    </div>
+                    <div th:each="response : ${ticket.responses}" class="d-flex mb-3">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-user-circle fa-2x" th:classappend="${response.user.role.name() == 'CUSTOMER'} ? 'text-primary' : 'text-success'"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mt-0" th:text="${response.user.fullName}">Staff Member</h6>
+                            <p th:text="${response.message}">We are looking into this issue.</p>
+                            <small class="text-muted" th:text="${#temporals.format(response.createdAt, 'MMM dd, yyyy HH:mm')}"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Ticket Status -->
+        <div class="col-lg-4">
+            <div class="card" data-aos="fade-left">
+                <div class="card-header">
+                    Ticket Status
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Status
+                        <span class="badge"
+                              th:classappend="${#strings.toString(ticket.status) == 'OPEN'} ? 'bg-danger' :
+                                             (${#strings.toString(ticket.status) == 'IN_PROGRESS'} ? 'bg-warning text-dark' :
+                                             (${#strings.toString(ticket.status) == 'RESOLVED'} ? 'bg-success' :
+                                             (${#strings.toString(ticket.status) == 'CLOSED'} ? 'bg-secondary' : 'bg-info text-dark')))"
+                              th:text="${ticket.status.name().replace('_', ' ')}">
+                            OPEN
+                        </span>
+                    </li>
+                     <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Current Stage
+                        <span class="badge bg-dark" th:text="${ticket.stage != null ? ticket.stage.replace('_', ' ') : 'N/A'}">STAFF ASSIGNED</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Priority
+                        <span th:text="${ticket.priority.name().replace('_', ' ')}">Medium</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Category
+                        <span th:text="${ticket.category}">Hardware</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Created
+                        <span th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd')}"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Assigned To
+                        <span th:text="${ticket.assignedTo != null ? ticket.assignedTo.fullName : 'Unassigned'}">John Staff</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

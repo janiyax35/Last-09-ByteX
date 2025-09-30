@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{warehouse-manager/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Warehouse Dashboard</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Warehouse Dashboard</h1>
+    </div>
+
+    <!-- Requests Needing Purchase -->
+    <div class="card mb-4" data-aos="fade-up">
+        <div class="card-header bg-warning text-dark">
+            <i class="fas fa-exclamation-circle"></i> Part Requests Requiring Purchase
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Part Name</th>
+                        <th>Quantity Needed</th>
+                        <th>Requested By</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="request : ${requestsToPurchase}">
+                        <td th:text="${request.part.partName}">NVIDIA RTX 4090</td>
+                        <td th:text="${request.quantity}">5</td>
+                        <td th:text="${request.requestor.fullName}">Mike Tech</td>
+                        <td>
+                            <a th:href="@{/warehouse-manager/purchase-orders/new}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus"></i> Create Purchase Order
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(requestsToPurchase)}">
+                        <td colspan="4" class="text-center">No outstanding part requests to purchase.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Purchase Orders -->
+    <div class="card" data-aos="fade-up" data-aos-delay="100">
+        <div class="card-header">
+            <i class="fas fa-shipping-fast"></i> Active Purchase Orders
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>PO ID</th>
+                        <th>Supplier</th>
+                        <th>Order Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="po : ${activePOs}">
+                        <td th:text="${po.id}">1</td>
+                        <td th:text="${po.supplier.name}">TechSupplies Inc.</td>
+                        <td th:text="${#temporals.format(po.orderDate, 'yyyy-MM-dd')}">2023-10-27</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${#strings.toString(po.status) == 'PENDING'} ? 'bg-secondary' :
+                                                 (${#strings.toString(po.status) == 'APPROVED'} ? 'bg-info text-dark' :
+                                                 (${#strings.toString(po.status) == 'SHIPPED'} ? 'bg-primary' : 'bg-warning text-dark'))"
+                                  th:text="${po.status.name().replace('_', ' ')}">
+                                PENDING
+                            </span>
+                        </td>
+                        <td>
+                            <a th:href="@{/warehouse-manager/purchase-orders}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(activePOs)}">
+                        <td colspan="5" class="text-center">No active purchase orders.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

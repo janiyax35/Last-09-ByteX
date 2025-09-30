@@ -1,73 +1,100 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
-<head th:replace="~{layouts/dashboard-layout :: head('My Dashboard')}"></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{customer/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Customer Dashboard</title>
+</head>
 <body>
-<div class="wrapper">
-    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
-    <div id="content">
-        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
-        <div class="container-fluid">
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-dark">My Support Tickets</h1>
-                <a th:href="@{/customer/tickets/new}" class="btn btn-primary shadow-sm">
-                    <i class="fas fa-plus-circle fa-sm"></i> Create New Ticket
-                </a>
-            </div>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">My Dashboard</h1>
+    </div>
 
-            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-
-            <!-- Search Form -->
-            <div class="card shadow mb-4">
+    <!-- Ticket Stats -->
+    <div class="row">
+        <div class="col-md-3 mb-3" data-aos="fade-up">
+            <div class="card text-white bg-danger h-100">
                 <div class="card-body">
-                    <form th:action="@{/customer/dashboard}" method="get" class="d-flex">
-                        <input type="text" name="keyword" class="form-control me-2" placeholder="Search by Ticket ID or Subject..." th:value="${keyword}">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                    </form>
+                    <h5 class="card-title">Open</h5>
+                    <h2 th:text="${tickets.stream().filter(t -> #strings.toString(t.status) == 'OPEN').count()}">0</h2>
                 </div>
             </div>
-
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">My Tickets Overview</h6>
-                </div>
+        </div>
+        <div class="col-md-3 mb-3" data-aos="fade-up" data-aos-delay="100">
+            <div class="card text-white bg-warning h-100">
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Subject</th>
-                                    <th>Status</th>
-                                    <th>Stage</th>
-                                    <th>Last Updated</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="ticket : ${tickets}">
-                                    <td th:text="${ticket.ticketId}"></td>
-                                    <td th:text="${ticket.subject}"></td>
-                                    <td><span class="badge bg-primary" th:text="${ticket.status}"></span></td>
-                                    <td><span class="badge bg-info" th:text="${ticket.stage?.displayName}"></span></td>
-                                    <td th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
-                                    <td>
-                                        <a th:href="@{/customer/tickets/{id}(id=${ticket.ticketId})}" class="btn btn-info btn-sm" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(tickets)}">
-                                    <td colspan="6" class="text-center">You have not created any support tickets yet.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <h5 class="card-title">In Progress</h5>
+                    <h2 th:text="${tickets.stream().filter(t -> #strings.toString(t.status) == 'IN_PROGRESS').count()}">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3" data-aos="fade-up" data-aos-delay="200">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Resolved</h5>
+                    <h2 th:text="${tickets.stream().filter(t -> #strings.toString(t.status) == 'RESOLVED').count()}">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3" data-aos="fade-up" data-aos-delay="300">
+            <div class="card text-white bg-secondary h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Closed</h5>
+                    <h2 th:text="${tickets.stream().filter(t -> #strings.toString(t.status) == 'CLOSED').count()}">0</h2>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="card mt-4" data-aos="fade-up">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            Recent Tickets
+            <a th:href="@{/customer/tickets/new}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i> Create New Ticket
+            </a>
+        </div>
+        <div class="card-body">
+             <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Last Updated</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ticket : ${tickets.stream().limit(5).collect(T(java.util.stream.Collectors).toList())}">
+                            <td th:text="${ticket.id}">1</td>
+                            <td th:text="${ticket.subject}">PC not starting</td>
+                            <td>
+                               <span class="badge"
+                                      th:classappend="${#strings.toString(ticket.status) == 'OPEN'} ? 'bg-danger' :
+                                                     (${#strings.toString(ticket.status) == 'IN_PROGRESS'} ? 'bg-warning text-dark' :
+                                                     (${#strings.toString(ticket.status) == 'RESOLVED'} ? 'bg-success' :
+                                                     (${#strings.toString(ticket.status) == 'CLOSED'} ? 'bg-secondary' : 'bg-info text-dark')))"
+                                      th:text="${ticket.status.name().replace('_', ' ')}">
+                                    OPEN
+                                </span>
+                            </td>
+                            <td th:text="${#temporals.format(ticket.updatedAt, 'yyyy-MM-dd HH:mm')}">2023-10-27 10:30</td>
+                            <td>
+                                <a th:href="@{/customer/tickets/view/{id}(id=${ticket.id})}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> View
+                                a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(tickets)}">
+                            <td colspan="5" class="text-center">You have not created any tickets yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
-<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
 </body>
 </html>

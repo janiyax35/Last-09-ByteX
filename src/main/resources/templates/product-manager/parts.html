@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{product-manager/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Manage Parts</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Manage Parts Inventory</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a th:href="@{/product-manager/parts/new}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-plus"></i> Add New Part
+            </a>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+
+    <div class="card" data-aos="fade-up">
+        <div class="card-header">
+            Parts Catalog
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Part Number</th>
+                        <th>Name</th>
+                        <th>Stock</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="part : ${parts}">
+                        <td th:text="${part.id}">1</td>
+                        <td th:text="${part.partNumber}">CPU001</td>
+                        <td th:text="${part.partName}">Intel Core i9</td>
+                        <td th:text="${part.currentStock}">10</td>
+                        <td th:text="${'$' + #numbers.formatDecimal(part.unitPrice, 1, 2)}">$599.99</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${#strings.toString(part.status) == 'ACTIVE'} ? 'bg-success' :
+                                                 (${#strings.toString(part.status) == 'LOW_STOCK'} ? 'bg-warning text-dark' :
+                                                 (${#strings.toString(part.status) == 'OUT_OF_STOCK'} ? 'bg-danger' : 'bg-secondary'))"
+                                  th:text="${part.status.name().replace('_', ' ')}">
+                                ACTIVE
+                            </span>
+                        </td>
+                        <td>
+                            <a th:href="@{/product-manager/parts/edit/{id}(id=${part.id})}" class="btn btn-sm btn-primary" title="Edit"><i class="fas fa-edit"></i></a>
+                            <a th:href="@{/product-manager/parts/delete/{id}(id=${part.id})}" class="btn btn-sm btn-danger" title="Discontinue" onclick="return confirm('Are you sure you want to mark this part as discontinued?');">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

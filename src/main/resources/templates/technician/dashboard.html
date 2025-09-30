@@ -1,48 +1,68 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
-<head th:replace="~{layouts/dashboard-layout :: head('Technician Dashboard')}"></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{technician/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Technician Dashboard</title>
+</head>
 <body>
-<div class="wrapper">
-    <nav th:replace="~{layouts/dashboard-layout :: sidebar}"></nav>
-    <div id="content">
-        <nav th:replace="~{layouts/dashboard-layout :: topbar}"></nav>
-        <div class="container-fluid">
-            <h1 class="h3 mb-2 text-dark">My Repair Jobs</h1>
-            <div class="card shadow mb-4">
-                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Assigned Tickets</h6></div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Ticket ID</th>
-                                    <th>Subject</th>
-                                    <th>Customer</th>
-                                    <th>Repair Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="repair : ${repairs}">
-                                    <td th:text="${repair.ticket.ticketId}"></td>
-                                    <td th:text="${repair.ticket.subject}"></td>
-                                    <td th:text="${repair.ticket.customer.fullName}"></td>
-                                    <td><span class="badge bg-warning" th:text="${repair.status}"></span></td>
-                                    <td>
-                                        <a th:href="@{/technician/repairs/{id}(id=${repair.repairId})}" class="btn btn-info btn-sm">View Details</a>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(repairs)}">
-                                    <td colspan="5" class="text-center">No repair jobs assigned to you.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">My Assigned Repairs</h1>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+    <div th:if="${param.error == 'access_denied'}" class="alert alert-danger" role="alert">
+        Access Denied: You can only view repairs assigned to you.
+    </div>
+
+    <div class="card" data-aos="fade-up">
+        <div class="card-header">
+            <i class="fas fa-wrench"></i> Active Repair Jobs
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Repair ID</th>
+                        <th>Ticket ID</th>
+                        <th>Subject</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="repair : ${repairs}">
+                        <td th:text="${repair.id}">1</td>
+                        <td th:text="${repair.ticket.id}">101</td>
+                        <td th:text="${repair.ticket.subject}">PC not working</td>
+                        <td th:text="${repair.ticket.customer.fullName}">John Doe</td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${#strings.toString(repair.status) == 'PENDING'} ? 'bg-secondary' :
+                                                 (${#strings.toString(repair.status) == 'IN_PROGRESS'} ? 'bg-primary' :
+                                                 (${#strings.toString(repair.status) == 'WAITING_FOR_PARTS'} ? 'bg-warning text-dark' :
+                                                 (${#strings.toString(repair.status) == 'COMPLETED'} ? 'bg-success' : 'bg-danger')))"
+                                  th:text="${repair.status.name().replace('_', ' ')}">
+                                PENDING
+                            </span>
+                        </td>
+                        <td>
+                            <a th:href="@{/technician/repairs/view/{id}(id=${repair.id})}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(repairs)}">
+                        <td colspan="6" class="text-center">You have no repair jobs assigned to you.</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-<div th:replace="~{layouts/dashboard-layout :: scripts}"></div>
 </body>
 </html>

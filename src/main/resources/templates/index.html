@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{main-layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Welcome to ByteX</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="container my-5">
+            <div class="p-5 text-center bg-light rounded-3" data-aos="fade-up">
+                <img th:src="@{/images/logo.png}" alt="ByteX Logo" style="height: 100px; margin-bottom: 20px;">
+                <h1 class="text-dark">Welcome to ByteX Customer Care</h1>
+                <p class="lead">
+                    Your one-stop solution for PC parts and support.
+                </p>
+                <hr>
+                <p>
+                    Whether you need to report an issue, track a repair, or manage your products, our system is here to help.
+                </p>
+                <div sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}" class="btn btn-primary btn-lg mt-3">
+                        <i class="fas fa-sign-in-alt"></i> Get Started
+                    </a>
+                </div>
+                 <div sec:authorize="isAuthenticated()">
+                    <a th:href="@{/customer/dashboard}" class="btn btn-primary btn-lg mt-3" sec:authorize="hasAuthority('ROLE_CUSTOMER')">
+                        <i class="fas fa-tachometer-alt"></i> Go to My Dashboard
+                    </a>
+                     <a th:href="@{/staff/dashboard}" class="btn btn-primary btn-lg mt-3" sec:authorize="hasAuthority('ROLE_STAFF')">
+                        <i class="fas fa-tachometer-alt"></i> Go to My Dashboard
+                    </a>
+                     <a th:href="@{/technician/dashboard}" class="btn btn-primary btn-lg mt-3" sec:authorize="hasAuthority('ROLE_TECHNICIAN')">
+                        <i class="fas fa-tachometer-alt"></i> Go to My Dashboard
+                    </a>
+                     <a th:href="@{/product-manager/dashboard}" class="btn btn-primary btn-lg mt-3" sec:authorize="hasAuthority('ROLE_PRODUCT_MANAGER')">
+                        <i class="fas fa-tachometer-alt"></i> Go to My Dashboard
+                    </a>
+                     <a th:href="@{/warehouse-manager/dashboard}" class="btn btn-primary btn-lg mt-3" sec:authorize="hasAuthority('ROLE_WAREHOUSE_MANAGER')">
+                        <i class="fas fa-tachometer-alt"></i> Go to My Dashboard
+                    </a>
+                     <a th:href="@{/admin/dashboard}" class="btn btn-primary btn-lg mt-3" sec:authorize="hasAuthority('ROLE_ADMIN')">
+                        <i class="fas fa-tachometer-alt"></i> Go to My Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

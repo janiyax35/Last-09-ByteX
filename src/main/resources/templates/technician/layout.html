@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <div th:replace="~{main-layout :: head}"></div>
+    <title>Technician Dashboard</title>
+</head>
+<body>
+    <div th:replace="~{main-layout :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/technician/dashboard')} ? 'active' : ''" th:href="@{/technician/dashboard}">
+                                <i class="fas fa-tools"></i>
+                                My Repairs
+                            </a>
+                        </li>
+                        <!-- Add other technician links here -->
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 dashboard-main">
+                 <div th:replace="${content}"></div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{main-layout :: (script)}"></div>
+</body>
+</html>

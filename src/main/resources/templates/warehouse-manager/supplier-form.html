@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{warehouse-manager/layout :: (html(content = ~{::content}))}">
+<head>
+    <title>Supplier Form</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2" th:text="${supplier.id == null} ? 'Add New Supplier' : 'Edit Supplier'">Supplier Form</h1>
+    </div>
+
+    <div class="card" data-aos="fade-up">
+        <div class="card-body">
+            <form th:action="${supplier.id == null} ? @{/warehouse-manager/suppliers/new} : @{/warehouse-manager/suppliers/edit/{id}(id=${supplier.id})}"
+                  th:object="${supplier}" method="post">
+
+                <input type="hidden" th:field="*{id}" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label">Supplier Name</label>
+                        <input type="text" class="form-control" th:field="*{name}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="contactPerson" class="form-label">Contact Person</label>
+                        <input type="text" class="form-control" th:field="*{contactPerson}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" th:field="*{email}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" th:field="*{phone}">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" th:field="*{address}" rows="3"></textarea>
+                </div>
+
+                <hr>
+
+                <button type="submit" class="btn btn-primary" th:text="${supplier.id == null} ? 'Create Supplier' : 'Update Supplier'">Save</button>
+                <a th:href="@{/warehouse-manager/suppliers}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
